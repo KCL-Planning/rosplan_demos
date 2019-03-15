@@ -1,19 +1,21 @@
-<!-- ROSPlan turtlebot 2 demo; requires turtlebot_gazebo -->
+<?xml version="1.0"?>
 <launch>
+
+  <!-- ROSPlan turtlebot 2 demo; requires turtlebot_gazebo -->
 
   <!-- turtlebot simulation -->
   <include file="$(find turtlebot_gazebo)/launch/turtlebot_world.launch" />
   <include file="$(find turtlebot_gazebo)/launch/amcl_demo.launch" />  
+
+  <!-- roadmap (random waypoint generation) -->
+  <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" />
 
   <!-- ROSPlan -->
   <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
     <arg name="domain_path" value="$(find rosplan_turtlebot2_demo)/common/domain_turtlebot_demo.pddl" />
   </include>
 
-  <!-- roadmap (random waypoint generation) -->
-  <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" />
-
-  <!-- move base interface -->
+  <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
   <node name="rosplan_interface_movebase" pkg="rosplan_interface_movebase" type="rpmovebase" respawn="false" output="log">
     <param name="knowledge_base" value="rosplan_knowledge_base" />
     <param name="action_server" value="/move_base" />

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>rosplan_common_demos</name>
+  <name>rosplan_demos</name>
   <version>1.0.0</version>
   <description>
     Demos for ROSPlan: launch files, scripts, and rviz configs.
