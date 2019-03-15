@@ -9,24 +9,50 @@ This repository contains:
 
 ### Running a demo with the turtlebot 2, using Gazebo simulator (kinetic only)
 
-The turtlebot demo is now a simple exploration mission. The turtlebot will visit randomly generated waypoints around a map.
+NOTE for ```melodic``` users: Because turtlebot 2 simulation debian packages have not been released yet into melodic (last udpate 15.03.2019), this demo is now guaranteed to work only for kinetic, read more about it in this [issue](https://github.com/KCL-Planning/ROSPlan/issues/180).
 
-The domain for this demo is in the `rosplan_turtlebot2_demo` package, as `common/domain_turtlebot_demo.pddl`.
+If you wish to test in ```kinetic```, feel free to continue reading:
 
-To run the demo first follow the installation instructions and quick-start guide for the Turtlebot Simulator and Gazebo:
+### Demo brief description
 
-[Turtlebot Gazebo](http://wiki.ros.org/turtlebot_gazebo) 
+The turtlebot demo is a simple exploration mission.
 
-[Turtlebot Simulator](http://wiki.ros.org/turtlebot_simulator) 
+The turtlebot will visit randomly generated waypoints around a map.
+
+![alt turtlebot_rosplan_demo](https://github.com/oscar-lima/rosplan_demos/blob/master/rosplan_turtlebot2_demo/doc/isr_testbed.png "Turtlebot rosplan demo")
+
+### Turtlebot PDDL domain
+
+The PDDL domain file for this demo can be found under `rosplan_turtlebot2_demo` package, as `common/domain_turtlebot_demo.pddl`:
+
+```
+roscd rosplan_turtlebot2_demo/common
+gedit domain_turtlebot_demo.pddl
+```
+
+### Installation instructions
+
+To run the demo first follow the installation instructions and quick-start guide for the [Turtlebot Gazebo simulator](http://wiki.ros.org/turtlebot_gazebo) and [Turtlebot Simulator](http://wiki.ros.org/turtlebot_simulator) :
+```
+sudo apt install ros-kinetic-turtlebot-gazebo
+```
+Install further dependencies from source in your catkin workspace:
+```
+cd ~/ros_ws/src
+git clone https://github.com/clearpathrobotics/occupancy_grid_utils
+```
 
 Then source the ROSPlan workspace in two terminals.
+```
+source ~/ros_ws/devel/setup.bash
+```
 
-*1.* In the first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the rosplan_demos package:
+*1.* In the first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the `rosplan_demos` package:
 ```
 roslaunch rosplan_turtlebot2_demo turtlebot.launch
 ```
 
-*2.* In the second terminal run `turtlebot_explore.bash`, a script which
+*2.* In the second terminal run `turtlebot_explore.bash`, a script which:
 - adds to the knowledge base the PDDL objects and facts which comprise the initial state;
 - adds the goals to the knowledge base; and
 - calls the ROSPlan services which generate a plan and dispatch it.
@@ -65,3 +91,4 @@ KCL: (/rosplan_plan_dispatcher) Dispatching action [0, goto_waypoint, 0.804106, 
 KCL: (/rosplan_plan_dispatcher) Feedback received [0, action enabled]
 ...
 ```
+NOTE: You might experience a rotating behavior on the robot (overshooting the local trajectory), this is a known issue, however it should make progress towards the goal and eventually reach the waypoints.
