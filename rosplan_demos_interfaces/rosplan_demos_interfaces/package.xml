@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+
+    <name>rosplan_demos_interfaces</name>
+    <version>1.0.0</version>
+    <description>
+        NOTE: this is a metapackage!
+        This metapackage organizes rosplan interfaces (mapping and move base)
+        needed for the rosplan_demos to work.
+    </description>
+    <maintainer email="oscar.lima@dfki.de">Oscar Lima</maintainer>
+    <license>BSD</license>
+    <url type="website">https://github.com/KCL-Planning/rosplan_demos</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <export>
+        <metapackage/>
+    </export>
+
+</package>
