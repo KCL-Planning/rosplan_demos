@@ -19,7 +19,7 @@ The turtlebot demo is a simple exploration mission.
 
 The turtlebot will visit randomly generated waypoints around a map.
 
-![alt turtlebot_rosplan_demo](https://github.com/oscar-lima/rosplan_demos/blob/master/rosplan_turtlebot2_demo/doc/isr_testbed.png "Turtlebot rosplan demo")
+![alt turtlebot_rosplan_demo](https://github.com/oscar-lima/rosplan_demos/tree/master/rosplan_turtlebot2_demo/doc/turtle_demo.png "Turtlebot rosplan demo")
 
 ### Turtlebot PDDL domain
 
