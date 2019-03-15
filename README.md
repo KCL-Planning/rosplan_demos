@@ -17,9 +17,9 @@ If you wish to test in ```kinetic```, feel free to continue reading:
 
 The turtlebot demo is a simple exploration mission.
 
-The turtlebot will visit randomly generated waypoints around a map.
+The turtlebot will visit randomly generated waypoints around a map. See image below showing rviz visualisation.
 
-![alt turtlebot_rosplan_demo](https://github.com/oscar-lima/rosplan_demos/tree/master/rosplan_turtlebot2_demo/doc/turtle_demo.png "Turtlebot rosplan demo")
+![](https://github.com/oscar-lima/rosplan_demos/tree/master/rosplan_turtlebot2_demo/doc/turtle_demo.png?raw=true)
 
 ### Turtlebot PDDL domain
 
