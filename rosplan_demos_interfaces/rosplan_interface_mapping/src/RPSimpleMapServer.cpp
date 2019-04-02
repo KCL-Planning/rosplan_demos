@@ -1,126 +1,192 @@
 #include "rosplan_interface_mapping/RPSimpleMapServer.h"
-
 #include <tf/transform_listener.h>
 
-/* implementation of rosplan_interface_mapping::RPSimpleMapServer.h */
 namespace KCL_rosplan {
 
-	/* constructor */
-	RPSimpleMapServer::RPSimpleMapServer(ros::NodeHandle &nh, std::string frame)
-	 : message_store(nh), fixed_frame(frame) {
+    RPSimpleMapServer::RPSimpleMapServer() : nh_("~") {
 
-		// config
-		std::string dataPath("common/");
-		nh.param("data_path", data_path, dataPath);
+        // knowledge interface
+        std::string kb;
+        nh_.param<std::string>("knowledge_base", kb, "knowledge_base");
+        std::stringstream ss;
+        ss << "/" << kb << "/update";
+        update_knowledge_client_ = nh_.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>(ss.str());
+        ros::service::waitForService(ss.str(), ros::Duration(20));
 
-		// knowledge interface
-		std::string kb = "knowledge_base";
-		nh.getParam("knowledge_base", kb);
-		std::stringstream ss;
-		ss << "/" << kb << "/update";
-		update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>(ss.str());
-		ros::service::waitForService(ss.str(), ros::Duration(20));
+        // query params from param server
+        nh_.param<std::string>("fixed_frame", fixed_frame_, "map");
 
-		// visualisation
-		ss.str("");
-		ss << "/" << kb << "/viz/waypoints";
-		waypoints_pub = nh.advertise<visualization_msgs::MarkerArray>(ss.str(), 10, true);
-	}
+        // visualisation
+        ss.str("");
+        ss << "/" << kb << "/viz/waypoints";
+        waypoints_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(ss.str(), 10, true);
+    }
 
-	/*-----------*/
-	/* build PRM */
-	/*-----------*/
+    /*-----------*/
+    /* build PRM */
+    /*-----------*/
 
-	/**
-	 * parses a pose with yaw from strings: "[f, f, f]"
-	 */
-	 void RPSimpleMapServer::parsePose(geometry_msgs::PoseStamped &pose, std::string line) {
+    /**
+    * parses a pose with yaw from strings: "[f, f, f]"
+    */
+    void RPSimpleMapServer::parsePose(geometry_msgs::PoseStamped &pose, std::string line) {
 
-		int curr,next;
-		curr=line.find("[")+1;
-		next=line.find(",",curr);
+        int curr,next;
+        curr=line.find("[")+1;
+        next=line.find(",",curr);
 
-		pose.pose.position.x = (double)atof(line.substr(curr,next-curr).c_str());
-		curr=next+1; next=line.find(",",curr);
+        pose.pose.position.x = (double)atof(line.substr(curr,next-curr).c_str());
+        curr=next+1; next=line.find(",",curr);
 
-		pose.pose.position.y = (double)atof(line.substr(curr,next-curr).c_str());
-		curr=next+1; next=line.find("]",curr);
+        pose.pose.position.y = (double)atof(line.substr(curr,next-curr).c_str());
+        curr=next+1; next=line.find("]",curr);
 
-		float theta = atof(line.substr(curr,next-curr).c_str());
-		tf::Quaternion q;
-		q.setEuler(theta, 0 ,0);
+        float theta = atof(line.substr(curr,next-curr).c_str());
+        tf::Quaternion q;
+        q.setEuler(theta, 0 ,0);
 
 
-		pose.pose.orientation.x = q.x();
-		pose.pose.orientation.y = q.z();
-		pose.pose.orientation.w = q.w();
-		pose.pose.orientation.z = q.y();
-	}
+        pose.pose.orientation.x = q.x();
+        pose.pose.orientation.y = q.z();
+        pose.pose.orientation.w = q.w();
+        pose.pose.orientation.z = q.y();
+    }
 
-	bool RPSimpleMapServer::setupRoadmap(std::string filename) {
+    bool RPSimpleMapServer::getWPCoordinates() {
 
-		ros::NodeHandle nh("~");
+        // function that gets an unknown amount of waypoints from param server under a specific namespace
 
-		// clear previous roadmap from knowledge base
-		ROS_INFO("KCL: (RPSimpleMapServer) Loading roadmap from file %s", filename.c_str());
+        XmlRpc::XmlRpcValue waypoint_list;
 
-		// load configuration file
-		std::ifstream infile(filename.c_str());
-		std::string line;
-		int curr,next;
-		while(std::getline(infile, line)) {
-			// read waypoint
-			curr=line.find("[");
-			std::string name = line.substr(0,curr);
+        if (!nh_.getParam("/waypoints", waypoint_list)) {
+            ROS_ERROR("Could not found waypoint list in parameter server");
+            return false;
+        }
 
-			// instance
-			rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
-			updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-			updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
-			updateSrv.request.knowledge.instance_type = "waypoint";
-			updateSrv.request.knowledge.instance_name = name;
-			update_knowledge_client.call(updateSrv);
+        if(!(waypoint_list.getType() == XmlRpc::XmlRpcValue::TypeArray)) {
+            ROS_ERROR("Failed to assert that waypoints are a list");
+            return false;
+        }
 
-			// data
-			geometry_msgs::PoseStamped pose;
-			pose.header.frame_id = fixed_frame;
-			parsePose(pose, line);
-			std::string id(message_store.insertNamed(name, pose));
-			db_name_map[name] = id;
+        // make sure that waypoint list is greater than 0
+        if(!(waypoint_list.size() > 0)) {
+            ROS_ERROR("waypoint list cannot be empty");
+            return false;
+        }
 
-			// save here for viz
-			Waypoint* wp = new Waypoint(name, pose.pose.position.x, pose.pose.position.y);
-			waypoints[wp->wpID] = wp;
-		}
-		infile.close();
+        // iterate over list
+        for(auto wit=waypoint_list.begin(); wit!=waypoint_list.end(); wit++) {
+            if(!wit->second.valid()) {
+                ROS_ERROR("waypoint value not set");
+                return false;
+            }
 
-		// publish visualization
-		publishWaypointMarkerArray(nh);
-	}
+            ROS_INFO_STREAM(wit->first << " : " << wit->second);
+            // TODO: store waypoints in struct?
+        }
+
+        return true;
+    }
+
+    void RPSimpleMapServer::publishWaypointMarkerArray()
+    {
+        visualization_msgs::MarkerArray marker_array;
+        size_t counter = 0;
+        for (std::map<std::string, Waypoint*>::iterator wit=waypoints_.begin(); wit!=waypoints_.end(); ++wit) {
+            visualization_msgs::Marker marker;
+            marker.header.frame_id = fixed_frame_;
+            marker.header.stamp = ros::Time();
+            marker.ns = "mission_waypoint";
+            marker.id = counter; counter++;
+            marker.type = visualization_msgs::Marker::SPHERE;
+            marker.action = visualization_msgs::Marker::MODIFY;
+            marker.pose.position.x = wit->second->real_x;
+            marker.pose.position.y = wit->second->real_y;
+            marker.pose.position.z = 0;
+            marker.pose.orientation.x = 0.0;
+            marker.pose.orientation.y = 0.0;
+            marker.pose.orientation.z = 0.0;
+            marker.pose.orientation.w = 1.0;
+            marker.scale.x = 0.2;
+            marker.scale.y = 0.2;
+            marker.scale.z = 0.2;
+            marker.color.a = 1.0;
+            marker.color.r = 0.3;
+            marker.color.g = 1.0;
+            marker.color.b = 0.3;
+            marker.text = wit->first;
+            marker_array.markers.push_back(marker);
+        }
+        waypoints_pub_.publish( marker_array );
+    }
+
+    /* clears all waypoints and edges */
+    void RPSimpleMapServer::clearMarkerArrays()
+    {
+        visualization_msgs::MarkerArray marker_array;
+        size_t counter = 0;
+        for (std::map<std::string, Waypoint*>::iterator wit=waypoints_.begin(); wit!=waypoints_.end(); ++wit) {
+            visualization_msgs::Marker marker;
+            marker.header.frame_id = fixed_frame_;
+            marker.header.stamp = ros::Time();
+            marker.ns = "mission_waypoint";
+            marker.id = counter; counter++;
+            marker.action = visualization_msgs::Marker::DELETE;
+            marker_array.markers.push_back(marker);
+        }
+        waypoints_pub_.publish( marker_array );
+    }
+
+    bool RPSimpleMapServer::setupRoadmap() {
+
+        ROS_INFO("KCL: (RPSimpleMapServer) Loading roadmap from parameter server");
+
+        // TODO: replace function below with getWPCoordinates()
+
+        // load configuration file
+//         std::ifstream infile(filename.c_str());
+//         std::string line;
+//         int curr,next;
+//         while(std::getline(infile, line)) {
+//             // read waypoint
+//             curr=line.find("[");
+//             std::string name = line.substr(0,curr);
+//
+//             // instance
+//             rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
+//             updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+//             updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
+//             updateSrv.request.knowledge.instance_type = "waypoint";
+//             updateSrv.request.knowledge.instance_name = name;
+//             update_knowledge_client_.call(updateSrv);
+//
+//             // data
+//             geometry_msgs::PoseStamped pose;
+//             pose.header.frame_id = fixed_frame_;
+//             parsePose(pose, line);
+//
+//             // save here for viz
+//             Waypoint* wp = new Waypoint(name, pose.pose.position.x, pose.pose.position.y);
+//             waypoints_[wp->wpID] = wp;
+//         }
+//         infile.close();
+//
+//         // publish visualization
+//         publishWaypointMarkerArray();
+        return true;
+    }
 
 } // close namespace
 
-	/*-------------*/
-	/* Main method */
-	/*-------------*/
+int main(int argc, char **argv) {
 
-	int main(int argc, char **argv) {
+    ros::init(argc, argv, "rosplan_simple_map_server");
 
-		// setup ros
-		ros::init(argc, argv, "rosplan_simple_map_server");
-		ros::NodeHandle nh("~");
+    // init
+    KCL_rosplan::RPSimpleMapServer sms;
+    sms.setupRoadmap();
 
-		// params
-		std::string filename("waypoints.txt");
-		std::string fixed_frame("map");
-		nh.param("waypoint_file", filename, filename);
-		nh.param("fixed_frame", fixed_frame, fixed_frame);
-
-		// init
-		KCL_rosplan::RPSimpleMapServer sms(nh, fixed_frame);
-		sms.setupRoadmap(filename);
-
-		ROS_INFO("KCL: (RPSimpleMapServer) Ready to receive.");
-		ros::spin();
-		return 0;
-	}
+    ROS_INFO("KCL: (RPSimpleMapServer) Ready to receive.");
+    ros::spin();
+    return 0;
+}

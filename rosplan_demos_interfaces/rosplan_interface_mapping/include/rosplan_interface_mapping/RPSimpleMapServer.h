@@ -6,8 +6,6 @@
 #include "visualization_msgs/Marker.h"
 #include "geometry_msgs/PoseStamped.h"
 
-#include "mongodb_store/message_store.h"
-
 #include "rosplan_knowledge_msgs/KnowledgeItem.h"
 #include "rosplan_knowledge_msgs/KnowledgeUpdateService.h"
 
@@ -22,55 +20,50 @@
 
 namespace KCL_rosplan {
 
-	struct Waypoint 
-	{
-		Waypoint(const std::string &id, double xCoord, double yCoord)
-			: wpID(id), real_x(xCoord), real_y(yCoord) {}
+    struct Waypoint
+    {
+        Waypoint(const std::string &id, double xCoord, double yCoord)
+            : wpID(id), real_x(xCoord), real_y(yCoord) {}
 
-		Waypoint()
-			: wpID("wp_err"), real_x(0), real_y(0) {}
-		
-		float getDistance(const Waypoint& other) {
-			return sqrt((real_x - other.real_x) * (real_x - other.real_x) + (real_y - other.real_y) * (real_y - other.real_y));
-		}
-		
-		std::string wpID;
-		double real_x;
-		double real_y;
-		std::vector<std::string> neighbours;
-	};
+        Waypoint()
+            : wpID("wp_err"), real_x(0), real_y(0) {}
 
-	class RPSimpleMapServer
-	{
+        float getDistance(const Waypoint& other) {
+            return sqrt((real_x - other.real_x) * (real_x - other.real_x) + (real_y - other.real_y) * (real_y - other.real_y));
+        }
 
-	private:
-		
-		std::string data_path;
+        std::string wpID;
+        double real_x;
+        double real_y;
+        std::vector<std::string> neighbours;
+    };
 
-		// Scene database
-		mongodb_store::MessageStoreProxy message_store;
+    class RPSimpleMapServer
+    {
 
-		// Knowledge base
-		ros::ServiceClient update_knowledge_client;
+    public:
 
-		// Roadmap
-		std::map<std::string, Waypoint*> waypoints;
-		std::map<std::string, std::string> db_name_map;
-		void parsePose(geometry_msgs::PoseStamped &pose, std::string line);
-		
-		// visualisation
-		std::string fixed_frame;
-		ros::Publisher waypoints_pub;
-		void publishWaypointMarkerArray(ros::NodeHandle nh);
-		void clearMarkerArrays(ros::NodeHandle nh);
+        RPSimpleMapServer();
 
-	public:
+        // service to (re)generate waypoints
+        bool setupRoadmap();
 
-		/* constructor */
-		RPSimpleMapServer(ros::NodeHandle &nh, std::string frame);
+    private:
 
-		/* service to (re)generate waypoints */
-		bool setupRoadmap(std::string filename);
-	};
+        // Roadmap
+        std::map<std::string, Waypoint*> waypoints_;
+        std::map<std::string, std::string> db_name_map;
+        void parsePose(geometry_msgs::PoseStamped &pose, std::string line);
+        bool getWPCoordinates();
+
+        // visualisation
+        void publishWaypointMarkerArray();
+        void clearMarkerArrays();
+
+        ros::NodeHandle nh_;
+        ros::ServiceClient update_knowledge_client_; // to update KB
+        ros::Publisher waypoints_pub_;
+        std::string fixed_frame_;
+    };
 }
 #endif

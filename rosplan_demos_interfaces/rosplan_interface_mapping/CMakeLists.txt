@@ -3,68 +3,45 @@ project(rosplan_interface_mapping)
 
 add_compile_options(-std=c++11)
 
-## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  rospy
-  std_msgs
   rosplan_knowledge_msgs
   nav_msgs
-  mongodb_store
   geometry_msgs
   diagnostic_msgs
   visualization_msgs
   tf
   occupancy_grid_utils
+  message_generation
+  genmsg
 )
 
-find_package(Boost REQUIRED COMPONENTS
-  filesystem
+add_service_files(
+  FILES
+  CreatePRM.srv
+  AddWaypoint.srv
+  RemoveWaypoint.srv
 )
 
-add_definitions(-Wno-deprecated-declarations) # Disable deprecated declarations warning (about std::auto_ptr)
-
-###################################
-## catkin specific configuration ##
-###################################
-
-## Declare things to be passed to dependent projects
-catkin_package(
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp rospy std_msgs rosplan_knowledge_msgs nav_msgs mongodb_store geometry_msgs diagnostic_msgs visualization_msgs tf
-  DEPENDS
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
 )
+
+catkin_package()
 
 ###########
 ## Build ##
 ###########
 
-## include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
   include
+  ${catkin_INCLUDE_DIRS}
 )
 
-## roadmap sources
-set(RPROADMAP_SOURCES
-	src/RPRoadmapServer.cpp
-	src/RPRoadmapVisualization.cpp)
-
-## simple map sources
-set(RPSIMPLEMAP_SOURCES
-  src/RPSimpleMapServer.cpp
-  src/RPSimpleMapVisualization.cpp)
-
 ## Declare cpp executables
-add_executable(rproadmapServer ${RPROADMAP_SOURCES})
-add_dependencies(rproadmapServer ${catkin_EXPORTED_TARGETS})
-
-add_executable(rpsimplemapServer ${RPSIMPLEMAP_SOURCES})
-add_dependencies(rpsimplemapServer ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries against which to link a library or executable target
-target_link_libraries(rproadmapServer ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(rpsimplemapServer ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(rproadmapServer src/RPRoadmapServer.cpp)
+target_link_libraries(rproadmapServer ${catkin_LIBRARIES})
 
 ##########
 ## Test ##
@@ -76,7 +53,7 @@ target_link_libraries(rpsimplemapServer ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 ## Install ##
 #############
 
-install(TARGETS rproadmapServer rpsimplemapServer
+install(TARGETS rproadmapServer
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
