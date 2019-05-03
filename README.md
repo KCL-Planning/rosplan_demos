@@ -1,7 +1,6 @@
-# rosplan_demos
+# ROSPlan Demos
+
 Tutorials and Demos for ROSPlan.
-
-
 
 ### Running a demo with the turtlebot
 
