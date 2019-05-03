@@ -1,5 +1,7 @@
 # rosplan_demos
 
+[![Build Status](https://travis-ci.com/KCL-Planning/rosplan_demos.svg?branch=master)](https://travis-ci.com/KCL-Planning/rosplan_demos)
+
 This repository contains:
 
 - the main rosplan turtlebot exploration demo (previously: rosplan_demos, now ->pkg: rosplan_turtlebot2_demo)
