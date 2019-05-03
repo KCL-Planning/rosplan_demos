@@ -1,5 +1,4 @@
-rosplan_demos
-=================
+# rosplan_demos
 
 This repository contains:
 
@@ -27,19 +26,28 @@ The PDDL domain file for this demo can be found under `rosplan_turtlebot2_demo` 
 
 ```
 roscd rosplan_turtlebot2_demo/common
-gedit domain_turtlebot_demo.pddl
+cat domain_turtlebot_demo.pddl
 ```
 
 ### Installation instructions
 
-To run the demo first follow the installation instructions and quick-start guide for the [Turtlebot Gazebo simulator](http://wiki.ros.org/turtlebot_gazebo) and [Turtlebot Simulator](http://wiki.ros.org/turtlebot_simulator) :
+To run the demo first follow the installation instructions and quick-start guide for the [Turtlebot Gazebo simulator](http://wiki.ros.org/turtlebot_gazebo) and [Turtlebot Simulator](http://wiki.ros.org/turtlebot_simulator).
+
+Install debian dependencies (simulator, move base and mongoDB)
 ```
-sudo apt install ros-kinetic-turtlebot-gazebo
+sudo apt install ros-kinetic-turtlebot-gazebo ros-kinetic-move-base-msgs ros-kinetic-mongodb-store
 ```
+
 Install further dependencies from source in your catkin workspace:
 ```
 cd ~/ros_ws/src
 git clone https://github.com/clearpathrobotics/occupancy_grid_utils
+git clone https://github.com/KCL-Planning/rosplan_demos.git
+```
+
+Compile the code:
+```
+catkin build
 ```
 
 Then source the ROSPlan workspace in two terminals.
@@ -47,12 +55,14 @@ Then source the ROSPlan workspace in two terminals.
 source ~/ros_ws/devel/setup.bash
 ```
 
-*1.* In the first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the `rosplan_demos` package:
+### Run instructions
+
+*1.* In a first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the `rosplan_demos` package:
 ```
 roslaunch rosplan_turtlebot2_demo turtlebot.launch
 ```
 
-*2.* In the second terminal run `turtlebot_explore.bash`, a script which:
+*2.* In a second terminal run `turtlebot_explore.bash`, a script which:
 - adds to the knowledge base the PDDL objects and facts which comprise the initial state;
 - adds the goals to the knowledge base; and
 - calls the ROSPlan services which generate a plan and dispatch it.
@@ -92,3 +102,4 @@ KCL: (/rosplan_plan_dispatcher) Feedback received [0, action enabled]
 ...
 ```
 NOTE: You might experience a rotating behavior on the robot (overshooting the local trajectory), this is a known issue, however it should make progress towards the goal and eventually reach the waypoints.
+
