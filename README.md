@@ -35,9 +35,9 @@ cat domain_turtlebot_demo.pddl
 
 To run the demo first follow the installation instructions and quick-start guide for the [Turtlebot Gazebo simulator](http://wiki.ros.org/turtlebot_gazebo) and [Turtlebot Simulator](http://wiki.ros.org/turtlebot_simulator).
 
-Install debian dependencies (simulator, move base and mongoDB)
+Install debian dependencies
 ```
-sudo apt install ros-kinetic-turtlebot-gazebo ros-kinetic-move-base-msgs ros-kinetic-mongodb-store
+sudo apt install ros-kinetic-turtlebot-gazebo ros-kinetic-move-base-msgs
 ```
 
 Install further dependencies from source in your catkin workspace:
