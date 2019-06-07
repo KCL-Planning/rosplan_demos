@@ -1,14 +1,25 @@
-#include <fstream>
+/**
+ * 
+ * Copyright [2019] <KCL Kings College London>  
+ * 
+ * Author: Michael Cashmore (michael.cashmore@kcl.ac.uk)
+ * Maintainer: Michael Cashmore (michael.cashmore@kcl.ac.uk)
+ * Maintainer: Oscar Lima (oscar.lima@dfki.de)
+ * 
+ * RPRoadmapServer class is used to generate N free collision waypoints from a costmap subscription
+ * 
+ * - Currently this works throught the nav_msgs/GetMap service.
+ * - Waypoints are stored symbolically in the Knowledge Base.
+ * - Waypoint coordinates are stored in the parameter server.
+ * - Connectivity between waypoints is also computed.
+ * - Loading existing waypoints from a file is supported.
+ */
+
 #include <sstream>
 #include <string>
-#include <ctime>
-#include <stdlib.h>
-#include <algorithm>
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <occupancy_grid_utils/coordinate_conversions.h>
-
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/GetMap.h>
@@ -18,20 +29,16 @@
 #include <visualization_msgs/Marker.h>
 #include <rosplan_knowledge_msgs/KnowledgeItem.h>
 #include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
+#include <occupancy_grid_utils/ray_tracer.h>
+#include <occupancy_grid_utils/coordinate_conversions.h>
 
 #include "rosplan_interface_mapping/CreatePRM.h"
 #include "rosplan_interface_mapping/AddWaypoint.h"
 #include "rosplan_interface_mapping/RemoveWaypoint.h"
 
-#ifndef KCL_roadmap
-#define KCL_roadmap
+#ifndef KCL_rp_roadmap_server
+#define KCL_rp_roadmap_server
 
-/**
- * RPRoadmapServer is used to generate waypoints from a subscribed costmap.
- * Currently this works throught the nav_msgs/GetMap service.
- * Waypoints are stored symbolically in the Knowledge Base.
- * Waypoint coordinates are stored in the parameter server.
- */
 namespace KCL_rosplan {
 
     struct Waypoint
@@ -93,8 +100,7 @@ namespace KCL_rosplan {
 
     struct Edge
     {
-        Edge(const std::string &s, const std::string &e)
-            : start(s), end(e) {}
+        Edge(const std::string &s, const std::string &e) : start(s), end(e) {}
 
         std::string start;
         std::string end;
@@ -103,61 +109,115 @@ namespace KCL_rosplan {
     class RPRoadmapServer
     {
 
-    public:
+      public:
 
         RPRoadmapServer();
 
-        /* callbacks to maps and odom */
-        void odomCallback( const nav_msgs::OdometryConstPtr& msg );
-        void costMapCallback( const nav_msgs::OccupancyGridConstPtr& msg );
+        /** 
+         * @brief callback that gets executed upon receiving a odom msg, this is used to get the robot pose
+         * @param msg the odom information is encoded in this variable and its value comes from the ROS network
+         */
+        void odomCallback(const nav_msgs::OdometryConstPtr& msg);
 
-        /* service to (re)generate waypoints */
+        /** 
+         * @brief callback that gets executed upon receiving a costmap msg
+         * @param msg the costmap information is encoded in this variable and its value comes from the ROS network
+         */
+        void costMapCallback(const nav_msgs::OccupancyGridConstPtr& msg);
+
+        /**
+         * @brief given a waypoint unique id (string) and a pose this function stores the waypoint in the ROS parameter server
+         * @param wp_id string that identifies uniquely the waypoint
+         * @param pose x, y, theta coordinates and reference frame of the waypoint encoded as pose stamped msg
+         */
         void uploadWPToParamServer(std::string wp_id, geometry_msgs::PoseStamped pose);
+
+        /**
+         * @brief Callback function provided by this server node, when user makes a request to generate a roadmap
+         * @param req the request msg from the user, contains the parameters specified by the user from which the node
+         * will generate the waypoints
+         * @param res the response that we need to fill and provide to the user as feedback
+         */
         bool generateRoadmap(rosplan_interface_mapping::CreatePRM::Request &req, rosplan_interface_mapping::CreatePRM::Response &res);
+
+        /**
+         * @brief Callback function provided by this server node, when user makes a request to add a waypoint
+         * this function gets executed, then connects a new waypoint and stores it in the knowledge base and parameter server
+         * @param req the request msg from the user
+         * @param res the response that we need to fill and provide to the user as feedback
+         */
         bool addWaypoint(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res);
+
+        /**
+         * @brief Callback function provided by this server node, when user makes a request to remove a waypoint
+         * this function gets executed
+         * @param req the request msg from the user
+         * @param res the response that we need to fill and provide to the user as feedback
+         */
         bool removeWaypoint(rosplan_interface_mapping::RemoveWaypoint::Request &req, rosplan_interface_mapping::RemoveWaypoint::Response &res);
 
-        void createPRM(nav_msgs::OccupancyGrid map, unsigned int nr_waypoints, double min_distance,
-                double casting_distance, double connecting_distance, int occupancy_threshold, int total_attempts);
-
-    private:
-
-        void publishWaypointMarkerArray();
-        void publishEdgeMarkerArray();
-        void clearMarkerArrays();
-        bool clearWaypoint(const std::string &id);
         /**
-         * Check if two waypoints can be connected without colliding with any known scenery. The line should not
-         * come closer than @ref{min_width} than any known obstacle.
-         * @param w1 The first waypoint.
-         * @param w2 The second waypoint.
-         * @param threshold A value between -1 and 255 above which a cell is considered to be occupied.
-         * @return True if the waypoints can be connected, false otherwise.
+         * @brief Waypoint generation function, deletes all previous data and generates a new waypoint set
+         * @param map the costmap expressing the occupied and free cells of the map such that we do not
+         * generate waypoints on top of occupied cells
+         * @param nr_waypoints the desired number of waypoint to generate
+         * @param min_distance the minimum distance allowed between any pair of waypoints
+         * @param casting_distance the maximum distance a waypoint can be cast
+         * @param connecting_distance the maximum distance that can exists between waypoints for them to be considered connected
+         * @param total_attempts maximum amount of attempts to generate random valid waypoints
          */
-        bool canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2, int threshold) const;
+        void createPRM(nav_msgs::OccupancyGrid map, unsigned int nr_waypoints, double min_distance,
+                double casting_distance, double connecting_distance, int total_attempts);
+        
+        void start();
 
+      private:
+
+        /**
+         * @brief remove waypoint from parameter server and from ROSPlan Knowledge base
+         * @param id the waypoint id (string) of the waypoint to delete
+         * @return true if removed succesfully, false otherwise
+         */
+        bool clearWaypoint(const std::string &id);
+
+        /**
+        * @brief Check if two waypoints can be connected without colliding with any known scenery. The line should not
+        * come closer than @ref{min_width} than any known obstacle.
+        * @param w1 The first waypoint.
+        * @param w2 The second waypoint.
+        * @return True if the waypoints can be connected, false otherwise.
+        */
+        bool canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2) const;
+
+        /// visualisation functions
+        void pubWPGraph();
+        void clearWPGraph();
+
+        /// manage communication of this node and the ROS network
         ros::NodeHandle nh_;
-        std::string static_map_service_;
-        bool use_static_map_;
-        std::string fixed_frame_;
+        /// topic that this node needs
+        ros::Subscriber odom_sub_, map_sub_;
+        /// topics that this node offers
+        ros::Publisher waypoints_pub_, edges_pub_; // for visualisation purposes
+        /// services that this node will query
+        ros::ServiceClient update_kb_client_, get_map_client_;
+        /// services that are offered by this node
+        ros::ServiceServer remove_waypoint_service_server_, waypoint_service_server_, prm_service_server_;
 
-        // odometry
+        bool use_static_map_, costmap_received_;
+        std::string wp_reference_frame_;
         nav_msgs::OccupancyGrid cost_map_;
         geometry_msgs::PoseStamped base_odom_;
-        ros::ServiceClient map_client_;
         tf::TransformListener tf_;
 
-        // Knowledge base
-        ros::ServiceClient update_knowledge_client_;
+        // how much to wait in seconds for the costmap and KB update services
+        int srv_timeout_;
+        // threshold for a costmap cell to be considered occupied
+        int occupancy_threshold_;
 
         // Roadmap
         std::map<std::string, Waypoint*> waypoints_;
-        std::map<std::string, std::string> db_name_map_;
         std::vector<Edge> edges_;
-
-        // visualisation
-        ros::Publisher waypoints_pub_;
-        ros::Publisher edges_pub_;
 
     };
 }

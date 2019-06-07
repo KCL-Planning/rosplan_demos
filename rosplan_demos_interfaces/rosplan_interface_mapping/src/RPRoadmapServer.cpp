@@ -1,78 +1,76 @@
-#include "rosplan_interface_mapping/RPRoadmapServer.h"
-#include <occupancy_grid_utils/ray_tracer.h>
-#include <occupancy_grid_utils/coordinate_conversions.h>
+/**
+ * 
+ * Copyright [2019] <KCL King's College London>
+ * 
+ * Author: Michael Cashmore (michael.cashmore@kcl.ac.uk)
+ * Maintainer: Michael Cashmore (michael.cashmore@kcl.ac.uk)
+ * Maintainer: Oscar Lima (oscar.lima@dfki.de)
+ * 
+ * RPRoadmapServer class is used to generate N free collision waypoints from a costmap subscription
+ * 
+ * - Currently this works throught the nav_msgs/GetMap service.
+ * - Waypoints are stored symbolically in the Knowledge Base.
+ * - Waypoint coordinates are stored in the parameter server.
+ * - Connectivity between waypoints is also computed.
+ * - Loading existing waypoints from a file is supported.
+ * 
+ */
 
-/* implementation of rosplan_interface_mapping::RPRoadmapServer */
+#include "rosplan_interface_mapping/RPRoadmapServer.h"
+
 namespace KCL_rosplan {
 
-    /* constructor */
-    RPRoadmapServer::RPRoadmapServer() : nh_("~") {
+    RPRoadmapServer::RPRoadmapServer() : nh_("~"), costmap_received_(false), srv_timeout_(3.0), occupancy_threshold_(10) {
 
-        // config
-        std::string dataPath("common/");
-        std::string staticMapService("/static_map");
-        nh_.param("static_map_service_", static_map_service_, staticMapService);
+        // get required parameters from param server
         nh_.param("use_static_map_", use_static_map_, false);
-        nh_.param<std::string>("fixed_frame", fixed_frame_, "map");
+        nh_.param<std::string>("wp_reference_frame", wp_reference_frame_, "map");
+        nh_.param<int>("srv_timeout", srv_timeout_, 3.0);
+        nh_.param<int>("occupancy_threshold", occupancy_threshold_, 10);
 
-        // subscriptions and publications
-        ros::Subscriber odom_sub = nh_.subscribe<nav_msgs::Odometry>("/odom", 1, &RPRoadmapServer::odomCallback, this);
-        ros::Subscriber map_sub = nh_.subscribe<nav_msgs::OccupancyGrid>("/move_base/local_costmap/costmap", 1, &RPRoadmapServer::costMapCallback, this);
-        ros::ServiceServer createPRMService = nh_.advertiseService("/kcl_rosplan/roadmap_server/create_prm", &RPRoadmapServer::generateRoadmap, this);
-        ros::ServiceServer addWaypointService = nh_.advertiseService("/kcl_rosplan/roadmap_server/add_waypoint", &RPRoadmapServer::addWaypoint, this);
-        ros::ServiceServer removeWaypointService = nh_.advertiseService("/kcl_rosplan/roadmap_server/remove_waypoint", &RPRoadmapServer::removeWaypoint, this);
+        // subscriptions of this node, robot odometry and costmap
+        odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/odom", 1, &RPRoadmapServer::odomCallback, this);
+        map_sub_ = nh_.subscribe<nav_msgs::OccupancyGrid>("/move_base/global_costmap/costmap", 1, &RPRoadmapServer::costMapCallback, this);
 
-        // knowledge interface
-        std::string kb = "knowledge_base";
-        nh_.getParam("knowledge_base", kb);
-        std::stringstream ss;
-        ss << "/" << kb << "/update";
-        update_knowledge_client_ = nh_.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>(ss.str());
+        // publications of this node (for visualisation purposes), waypoints and connectivity information (edges)
+        waypoints_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("viz/waypoints", 10, true);
+        edges_pub_ = nh_.advertise<visualization_msgs::Marker>("viz/edges", 10, true);
 
-        // visualisation
-        ss.str("");
-        ss << "/" << kb << "/viz/waypoints";
-        waypoints_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(ss.str(), 10, true);
-        ss.str("");
-        ss << "/" << kb << "/viz/edges";
-        edges_pub_ = nh_.advertise<visualization_msgs::Marker>(ss.str(), 10, true);
+        // services offered by this node, create random wp (create prm), add single wp, remove a waypoint
+        prm_service_server_ = nh_.advertiseService("/kcl_rosplan/rosplan_roadmap_server/create_prm",
+                                                                &RPRoadmapServer::generateRoadmap, this);
+        waypoint_service_server_ = nh_.advertiseService("/kcl_rosplan/rosplan_roadmap_server/add_waypoint",
+                                                                &RPRoadmapServer::addWaypoint, this);
+        remove_waypoint_service_server_ = nh_.advertiseService("/kcl_rosplan/rosplan_roadmap_server/remove_waypoint",
+                                                                &RPRoadmapServer::removeWaypoint, this);
 
-        // map interface
-        map_client_ = nh_.serviceClient<nav_msgs::GetMap>(static_map_service_);
+        // services required by this node, to update rosplan KB and to query map from server
+        update_kb_client_ = nh_.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/rosplan_knowledge_base/update");
+        get_map_client_ = nh_.serviceClient<nav_msgs::GetMap>("/static_map");
 
         ROS_INFO("KCL: (RPRoadmapServer) Ready to receive.");
     }
 
-    /*------------------*/
-    /* callback methods */
-    /*------------------*/
-
-    /* update the costmap */
-    void RPRoadmapServer::costMapCallback( const nav_msgs::OccupancyGridConstPtr& msg ) {
+    // update the costmap with received information coming from callback (topic subscription)
+    void RPRoadmapServer::costMapCallback(const nav_msgs::OccupancyGridConstPtr& msg) {
         cost_map_ = *msg;
+        costmap_received_ = true;
     }
 
-    /* update position of the robot */
-    void RPRoadmapServer::odomCallback( const nav_msgs::OdometryConstPtr& msg ) {
-        //we assume that the odometry is published in the frame of the base
+    // update position of the robot
+    void RPRoadmapServer::odomCallback(const nav_msgs::OdometryConstPtr& msg) {
+        // we assume that the odometry is published in the frame of the base
         base_odom_.header = msg->header;
         base_odom_.pose.position = msg->pose.pose.position;
         base_odom_.pose.orientation = msg->pose.pose.orientation;
     }
 
-    /*-----------*/
-    /* build PRM */
-    /*-----------*/
+    bool RPRoadmapServer::canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2) const {
 
-    /**
-     * Check if two waypoints can be connected without colliding with any known scenery. The line should not
-     * come closer than @ref{min_width} than any known obstacle.
-     * @param w1 The first waypoint.
-     * @param w2 The second waypoint.
-     * @param threshold A value between -1 and 255 above which a cell is considered to be occupied.
-     * @return True if the waypoints can be connected, false otherwise.
-     */
-    bool RPRoadmapServer::canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2, int threshold) const {
+        if(!costmap_received_) {
+            ROS_ERROR("Costmap not received, ensure that costmap topic has data (default topic: /move_base/global_costmap/costmap)");
+            return false;
+        }
 
         // Check if the turtlebot is going to collide with any known obstacle.
         occupancy_grid_utils::RayTraceIterRange ray_range = occupancy_grid_utils::rayTrace(cost_map_.info, w1, w2);
@@ -82,101 +80,12 @@ namespace KCL_rosplan {
             const occupancy_grid_utils::Cell& cell = *i;
 
             // Check if this cell is occupied.
-            if (cost_map_.data[cell.x + cell.y * cost_map_.info.width] > threshold)
+            if (cost_map_.data[cell.x + cell.y * cost_map_.info.width] > occupancy_threshold_)
             {
                 return false;
             }
         }
         return true;
-    }
-
-    void RPRoadmapServer::publishWaypointMarkerArray() // TODO: remove copy pasted function
-    {
-        visualization_msgs::MarkerArray marker_array;
-        size_t counter = 0;
-        for (std::map<std::string, Waypoint*>::iterator wit=waypoints_.begin(); wit!=waypoints_.end(); ++wit) {
-            visualization_msgs::Marker marker;
-            marker.header.frame_id = fixed_frame_;
-            marker.header.stamp = ros::Time();
-            marker.ns = "mission_waypoint";
-            marker.id = counter; counter++;
-            marker.type = visualization_msgs::Marker::SPHERE;
-            marker.action = visualization_msgs::Marker::MODIFY;
-            marker.pose.position.x = wit->second->real_x;
-            marker.pose.position.y = wit->second->real_y;
-            marker.pose.position.z = 0;
-            marker.pose.orientation.x = 0.0;
-            marker.pose.orientation.y = 0.0;
-            marker.pose.orientation.z = 0.0;
-            marker.pose.orientation.w = 1.0;
-            marker.scale.x = 0.2;
-            marker.scale.y = 0.2;
-            marker.scale.z = 0.2;
-            marker.color.a = 1.0;
-            marker.color.r = 0.3;
-            marker.color.g = 1.0;
-            marker.color.b = 0.3;
-            marker.text = wit->first;
-            marker_array.markers.push_back(marker);
-        }
-        waypoints_pub_.publish( marker_array );
-    }
-
-    void RPRoadmapServer::publishEdgeMarkerArray()
-    {
-        visualization_msgs::Marker marker;
-        marker.header.frame_id = "map";
-        marker.header.stamp = ros::Time();
-        marker.ns = "mission_edges";
-        marker.id = 0;
-        marker.type = visualization_msgs::Marker::LINE_LIST;
-        marker.action = visualization_msgs::Marker::MODIFY;
-        marker.scale.x = 0.05;
-        marker.color.a = 1.0;
-        marker.color.r = 0.0;
-        marker.color.g = 0.3;
-        marker.color.b = 1.0;
-        for (std::vector<Edge>::iterator eit=edges_.begin(); eit!=edges_.end(); ++eit) {
-            geometry_msgs::Point start;
-            start.x = waypoints_[eit->start]->real_x;
-            start.y = waypoints_[eit->start]->real_y;
-            start.z = 0;
-            marker.points.push_back(start);
-
-            geometry_msgs::Point end;
-            end.x = waypoints_[eit->end]->real_x;
-            end.y = waypoints_[eit->end]->real_y;
-            end.z = 0;
-            marker.points.push_back(end);
-
-        }
-        edges_pub_.publish( marker );
-    }
-
-    /* clears all waypoints and edges */
-    void RPRoadmapServer::clearMarkerArrays() {
-
-        visualization_msgs::MarkerArray marker_array;
-        size_t counter = 0;
-        for (std::map<std::string, Waypoint*>::iterator wit=waypoints_.begin(); wit!=waypoints_.end(); ++wit) {
-            visualization_msgs::Marker marker;
-            marker.header.frame_id = "map";
-            marker.header.stamp = ros::Time();
-            marker.ns = "mission_waypoint";
-            marker.id = counter; counter++;
-            marker.action = visualization_msgs::Marker::DELETE;
-            marker_array.markers.push_back(marker);
-        }
-        waypoints_pub_.publish( marker_array );
-
-        visualization_msgs::Marker marker;
-        marker.header.frame_id = "base_link";
-        marker.header.stamp = ros::Time();
-        marker.ns = "mission_edges";
-        marker.id = 0;
-        marker.type = visualization_msgs::Marker::LINE_LIST;
-        marker.action = visualization_msgs::Marker::DELETE;
-        edges_pub_.publish( marker );
     }
 
     void RPRoadmapServer::uploadWPToParamServer(std::string wp_id, geometry_msgs::PoseStamped waypoint) {
@@ -192,47 +101,50 @@ namespace KCL_rosplan {
         nh_.setParam("/rosplan_demo_waypoints/" + wp_id, pose_as_array);
     }
 
-    /**
-     * Generates waypoints and stores them in the parameter server
-     */
     bool RPRoadmapServer::generateRoadmap(rosplan_interface_mapping::CreatePRM::Request &req, rosplan_interface_mapping::CreatePRM::Response &res) {
 
         // clear previous roadmap from knowledge base
         ROS_INFO("KCL: (RPRoadmapServer) Cleaning old roadmap");
+
+        // clear waypoint instances from KB
         rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
         updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
         updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
         updateSrv.request.knowledge.instance_type = "waypoint";
-        update_knowledge_client_.call(updateSrv);
 
-        // clear from visualization
-        clearMarkerArrays();
+        // wait for service existence
+        if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+            ROS_ERROR("ROSPlan update KB service not found (default srv name: /rosplan_knowledge_base/update)");
+            return false;
+        }
+
+        update_kb_client_.call(updateSrv);
 
         // read map
         nav_msgs::OccupancyGrid map;
         if(use_static_map_) {
             ROS_INFO("KCL: (RPRoadmapServer) Reading in map");
             nav_msgs::GetMap mapSrv;
-            map_client_.call(mapSrv);
+
+            // check for service existence
+            if(!get_map_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+                ROS_ERROR("Costmap service not found (default srv name: /static_map)");
+                return false;
+            }
+
+            get_map_client_.call(mapSrv);
             map = mapSrv.response.map;
         } else {
+            if(!costmap_received_) {
+                ROS_ERROR("Costmap not received, ensure that costmap topic has data (default topic: /move_base/global_costmap/costmap)");
+                return false;
+            }
             map = cost_map_;
         }
 
         // generate waypoints
         ROS_INFO("KCL: (RPRoadmapServer) Generating roadmap");
-        /*
-         * nr_waypoints, number of waypoints to generate before function terminates.
-         * min_distance, the minimum distance allowed between any pair of waypoints.
-         * casting_distance, the maximum distance a waypoint can be cast.
-         * connecting_distance, the maximum distance that can exists between waypoints for them to be connected.
-         * occupancy_threshold, a number between 0 and 255; determines above which value a cell is considered occupied.
-         */
-        createPRM(map, req.nr_waypoints, req.min_distance, req.casting_distance, req.connecting_distance, req.occupancy_threshold, req.total_attempts);
-
-        // publish visualization
-        publishWaypointMarkerArray();
-        publishEdgeMarkerArray();
+        createPRM(map, req.nr_waypoints, req.min_distance, req.casting_distance, req.connecting_distance, req.total_attempts);
 
         // add roadmap to knowledge base and scene database
         ROS_INFO("KCL: (RPRoadmapServer) Adding knowledge");
@@ -244,7 +156,14 @@ namespace KCL_rosplan {
             updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
             updateSrv.request.knowledge.instance_type = "waypoint";
             updateSrv.request.knowledge.instance_name = wit->first;
-            if(!update_knowledge_client_.call(updateSrv))
+
+            // wait for service existence
+            if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+                ROS_ERROR("ROSPlan update KB service not found (default srv name: /rosplan_knowledge_base/update)");
+                return false;
+            }
+
+            if(!update_kb_client_.call(updateSrv))
                 ROS_INFO("KCL: (RPRoadmapServer) Failed to call update service.");
 
             res.waypoints.push_back(wit->first);
@@ -263,7 +182,7 @@ namespace KCL_rosplan {
                 pairTo.key = "to";
                 pairTo.value = *nit;
                 updatePredSrv.request.knowledge.values.push_back(pairTo);
-                if(!update_knowledge_client_.call(updatePredSrv))
+                if(!update_kb_client_.call(updatePredSrv))
                     ROS_INFO("KCL: (RPRoadmapServer) Failed to call update service.");
             }
 
@@ -285,7 +204,7 @@ namespace KCL_rosplan {
                         (wit->second->real_x - waypoints_[*nit]->real_x)*(wit->second->real_x - waypoints_[*nit]->real_x)
                         + (wit->second->real_y - waypoints_[*nit]->real_y)*(wit->second->real_y - waypoints_[*nit]->real_y));
                 updateFuncSrv.request.knowledge.function_value = dist;
-                if(!update_knowledge_client_.call(updateFuncSrv))
+                if(!update_kb_client_.call(updateFuncSrv))
                     ROS_INFO("KCL: (RPRoadmapServer) Failed to call update service.");
             }
 
@@ -315,22 +234,17 @@ namespace KCL_rosplan {
         pair2.key = "wp";
         pair2.value = "wp0";
         updateSrv.request.knowledge.values.push_back(pair2);
-        update_knowledge_client_.call(updateSrv);
+        update_kb_client_.call(updateSrv);
+
+        // publish waypoint graph as markers for visualisation purposes
+        pubWPGraph();
 
         ROS_INFO("KCL: (RPRoadmapServer) Done");
         return true;
     }
 
-    /*
-     * Input:
-     *     nr_waypoints, number of waypoints to generate before function terminates.
-     *     min_distance, the minimum distance allowed between any pair of waypoints.
-     *     casting_distance, the maximum distance a waypoint can be cast.
-     *     connecting_distance, the maximum distance that can exists between waypoints for them to be connected.
-     *     occupancy_threshold, a number between 0 and 255; determines above which value a cell is considered occupied.
-     * Output: A roadmap G = (V, E)
-     */
-    void RPRoadmapServer::createPRM(nav_msgs::OccupancyGrid map, unsigned int nr_waypoints, double min_distance, double casting_distance, double connecting_distance, int occupancy_threshold, int total_attempts) {
+    void RPRoadmapServer::createPRM(nav_msgs::OccupancyGrid map, unsigned int nr_waypoints,
+                    double min_distance, double casting_distance, double connecting_distance, int total_attempts) {
 
         // map info
         int width = map.info.width;
@@ -356,7 +270,7 @@ namespace KCL_rosplan {
         start_pose.pose.position = base_odom_.pose.position;
         start_pose.pose.orientation = base_odom_.pose.orientation;
         try {
-            tf_.waitForTransform( base_odom_.header.frame_id, "map", ros::Time::now(), ros::Duration( 500 ) );
+            tf_.waitForTransform( base_odom_.header.frame_id, "map", ros::Time::now(), ros::Duration(500) );
             tf_.transformPose( "map", start_pose,  start_pose_transformed);
         } catch(tf::LookupException& ex) {
             ROS_ERROR("Lookup Error: %s\n", ex.what());
@@ -415,7 +329,7 @@ namespace KCL_rosplan {
                 p2.x = other_wp->real_x;
                 p2.y = other_wp->real_y;
 
-                if (wp->getDistance(*other_wp) < connecting_distance && canConnect(p1, p2, occupancy_threshold)) {
+                if (wp->getDistance(*other_wp) < connecting_distance && canConnect(p1, p2)) {
                     wp->neighbours.push_back(other_wp->wpID);
                     other_wp->neighbours.push_back(wp->wpID);
                     Edge e(wp->wpID, other_wp->wpID);
@@ -429,25 +343,43 @@ namespace KCL_rosplan {
         }
     }
 
-    /**
-        * Connects a new waypoint and stores it in the knowledge base and scene database
-        */
     bool RPRoadmapServer::addWaypoint(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res) {
 
         ROS_INFO("KCL: (RPRoadmapServer) Adding new waypoint");
 
-        // read map
+        if(req.id == "") {
+            ROS_ERROR("KCL: (RPRoadmapServer) Waypoint id cannot be empty, please name your waypoint");
+            return false;
+        }
+
         nav_msgs::OccupancyGrid map;
+        
+        // option 1: get map via service call from map server, srv name is "/static_map"
         if(use_static_map_) {
             ROS_INFO("KCL: (RPRoadmapServer) Reading in map");
             nav_msgs::GetMap mapSrv;
-            map_client_.call(mapSrv);
+
+            // check for service existence
+            if(!get_map_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+                ROS_ERROR("Costmap service not found (default srv name: /static_map)");
+                return false;
+            }
+
+            get_map_client_.call(mapSrv);
             map = mapSrv.response.map;
         } else {
+
+            // option 2: get map from topic subcription
+            if(!costmap_received_) {
+                ROS_ERROR("Costmap not received, ensure that costmap topic has data (default topic: /move_base/global_costmap/costmap)");
+                return false;
+            }
             map = cost_map_;
         }
 
-        // map info
+        // at this point map is available, either via service call to map server of via subscription to move base global costmap
+
+        // get properties from received map object
         int width = map.info.width;
         int height = map.info.height;
         double resolution = map.info.resolution; // m per cell
@@ -477,7 +409,7 @@ namespace KCL_rosplan {
 
             std::cout << "Try to connect " << new_wp->wpID << " to " << other_wp->wpID << "." << std::endl;
 
-            if (new_wp->getDistance(*other_wp) < req.connecting_distance && canConnect(p1, p2, req.occupancy_threshold)) {
+            if (new_wp->getDistance(*other_wp) < req.connecting_distance && canConnect(p1, p2)) {
                 new_wp->neighbours.push_back(other_wp->wpID);
                 other_wp->neighbours.push_back(new_wp->wpID);
                 Edge e(new_wp->wpID, other_wp->wpID);
@@ -492,21 +424,23 @@ namespace KCL_rosplan {
             }
         }
 
-
         // instance
         rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
         updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
         updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
         updateSrv.request.knowledge.instance_type = "waypoint";
         updateSrv.request.knowledge.instance_name = new_wp->wpID;
-        if (!update_knowledge_client_.call(updateSrv)) {
-            ROS_ERROR("Failed to add a new waypoint instance.");
+
+        // wait for service existence
+        if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+            ROS_ERROR("ROSPlan update KB service not found (default srv name: /rosplan_knowledge_base/update)");
             return false;
         }
 
-        // publish visualization
-        publishWaypointMarkerArray();
-        publishEdgeMarkerArray();
+        if (!update_kb_client_.call(updateSrv)) {
+            ROS_ERROR("Failed to add a new waypoint instance.");
+            return false;
+        }
 
         ROS_INFO("Process the %lu neighbours of this new waypoint.", new_wp->neighbours.size());
 
@@ -525,7 +459,7 @@ namespace KCL_rosplan {
             pairTo.key = "to";
             pairTo.value = *nit;
             updatePredSrv.request.knowledge.values.push_back(pairTo);
-            update_knowledge_client_.call(updatePredSrv);
+            update_kb_client_.call(updatePredSrv);
 
             // connected old->new
             updatePredSrv.request.knowledge.values.clear();
@@ -533,7 +467,7 @@ namespace KCL_rosplan {
             updatePredSrv.request.knowledge.values.push_back(pairFrom);
             pairTo.value = new_wp->wpID;
             updatePredSrv.request.knowledge.values.push_back(pairTo);
-            update_knowledge_client_.call(updatePredSrv);
+            update_kb_client_.call(updatePredSrv);
         }
 
         // functions
@@ -556,7 +490,7 @@ namespace KCL_rosplan {
                     (new_wp->real_x - waypoints_[*nit]->real_x)*(new_wp->real_x - waypoints_[*nit]->real_x)
                     + (new_wp->real_y - waypoints_[*nit]->real_y)*(new_wp->real_y - waypoints_[*nit]->real_y));
             updateFuncSrv.request.knowledge.function_value = dist;
-            update_knowledge_client_.call(updateFuncSrv);
+            update_kb_client_.call(updateFuncSrv);
 
             // distance old->new
             updateFuncSrv.request.knowledge.values.clear();
@@ -565,11 +499,14 @@ namespace KCL_rosplan {
             pairTo.value = new_wp->wpID;
             updateFuncSrv.request.knowledge.values.push_back(pairTo);
             updateFuncSrv.request.knowledge.function_value = dist;
-            update_knowledge_client_.call(updateFuncSrv);
+            update_kb_client_.call(updateFuncSrv);
         }
 
-        // upload wp to param server
+        // upload waypoint to param server
         uploadWPToParamServer(req.id, req.waypoint);
+
+        // publish wp for visualisation purposes
+        pubWPGraph();
 
         ROS_INFO("KCL: (RPRoadmapServer) Finished adding new waypoint");
 
@@ -579,43 +516,135 @@ namespace KCL_rosplan {
     bool RPRoadmapServer::removeWaypoint(rosplan_interface_mapping::RemoveWaypoint::Request &req,
                                         rosplan_interface_mapping::RemoveWaypoint::Response &res) {
 
-        if ( clearWaypoint(req.id) ) {
-            // publish visualization
-            publishWaypointMarkerArray();
-            publishEdgeMarkerArray();
-        }
+        // this function will get executed upon receiving a srv call request to this server node
+
+        // delete waypoint from param server and KB
+        clearWaypoint(req.id);
+
+        ROS_INFO("KCL: (RPRoadmapServer) Successfully removed waypoint from param server and rosplan KB.");
+
+        // srv call executed succesfully
         return true;
     }
 
     bool RPRoadmapServer::clearWaypoint(const std::string &name) {
 
-        if ( db_name_map_.count( name ) == 0 ) {
-            return false;
-        }
-
         // erase waypoint from param server
         nh_.deleteParam("/rosplan_demo_waypoints/" + name);
 
-        std::vector<Edge>::iterator eit = edges_.begin();
-        while( eit != edges_.end() ) {
-            if ( name == eit->start || name == eit->end ) {
-                eit = edges_.erase( eit );
-            } else {
-                eit++;
-            }
-        }
-        // remove instance
+        // remove waypoint instance from ROSPlan KB
         rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
         updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
         updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
         updateSrv.request.knowledge.instance_type = "waypoint";
         updateSrv.request.knowledge.instance_name = name;
-        if (!update_knowledge_client_.call(updateSrv)) {
-            ROS_INFO("Failed to remove old waypoint instance.");
+
+        // wait for service existence
+        if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+            ROS_ERROR("ROSPlan update KB service not found (default srv name: /rosplan_knowledge_base/update)");
+            return false;
+        }
+
+        if (!update_kb_client_.call(updateSrv)) {
+            ROS_INFO("Failed to remove old waypoint instance from KB.");
         }
 
         return true;
+    }
 
+    void RPRoadmapServer::pubWPGraph() {
+
+        // publish nodes as marker array
+        visualization_msgs::MarkerArray marker_array;
+        size_t counter = 0;
+
+        visualization_msgs::Marker node_marker;
+        node_marker.header.frame_id = wp_reference_frame_;
+        node_marker.header.stamp = ros::Time();
+        node_marker.ns = "mission_waypoint";
+        node_marker.type = visualization_msgs::Marker::SPHERE;
+        node_marker.action = visualization_msgs::Marker::MODIFY;
+        node_marker.pose.position.z = 0;
+        node_marker.pose.orientation.x = 0.0;
+        node_marker.pose.orientation.y = 0.0;
+        node_marker.pose.orientation.z = 0.0;
+        node_marker.pose.orientation.w = 1.0;
+        node_marker.scale.x = 0.2;
+        node_marker.scale.y = 0.2;
+        node_marker.scale.z = 0.2;
+        node_marker.color.a = 1.0;
+        node_marker.color.r = 0.3;
+        node_marker.color.g = 1.0;
+        node_marker.color.b = 0.3;
+
+        for (std::map<std::string, Waypoint*>::iterator wit=waypoints_.begin(); wit!=waypoints_.end(); ++wit) {
+            node_marker.id = counter++;
+            node_marker.pose.position.x = wit->second->real_x;
+            node_marker.pose.position.y = wit->second->real_y;
+            node_marker.text = wit->first;
+            marker_array.markers.push_back(node_marker);
+        }
+        waypoints_pub_.publish(marker_array);
+
+        // publish edges as marker array
+        visualization_msgs::Marker edge_marker;
+        edge_marker.header.frame_id = wp_reference_frame_;
+        edge_marker.header.stamp = ros::Time();
+        edge_marker.ns = "mission_edges";
+        edge_marker.type = visualization_msgs::Marker::LINE_LIST;
+        edge_marker.action = visualization_msgs::Marker::MODIFY;
+        edge_marker.scale.x = 0.05;
+        edge_marker.color.a = 1.0;
+        edge_marker.color.r = 0.0;
+        edge_marker.color.g = 0.3;
+        edge_marker.color.b = 1.0;
+        counter = 0;
+        for (std::vector<Edge>::iterator eit=edges_.begin(); eit!=edges_.end(); ++eit) {
+            edge_marker.id = counter++;
+            geometry_msgs::Point start;
+            start.x = waypoints_[eit->start]->real_x;
+            start.y = waypoints_[eit->start]->real_y;
+            start.z = 0;
+            edge_marker.points.push_back(start);
+
+            geometry_msgs::Point end;
+            end.x = waypoints_[eit->end]->real_x;
+            end.y = waypoints_[eit->end]->real_y;
+            end.z = 0;
+            edge_marker.points.push_back(end);
+
+        }
+        edges_pub_.publish(edge_marker);
+    }
+
+    // clears all waypoints and edges
+    void RPRoadmapServer::clearWPGraph() {
+
+        visualization_msgs::MarkerArray marker_array;
+        size_t counter = 0;
+        for (std::map<std::string, Waypoint*>::iterator wit=waypoints_.begin(); wit!=waypoints_.end(); ++wit) {
+            visualization_msgs::Marker marker;
+            marker.header.frame_id = "map";
+            marker.header.stamp = ros::Time();
+            marker.ns = "mission_waypoint";
+            marker.id = counter; counter++;
+            marker.action = visualization_msgs::Marker::DELETE;
+            marker_array.markers.push_back(marker);
+        }
+        waypoints_pub_.publish( marker_array );
+
+        visualization_msgs::Marker marker;
+        marker.header.frame_id = "base_link";
+        marker.header.stamp = ros::Time();
+        marker.ns = "mission_edges";
+        marker.id = 0;
+        marker.type = visualization_msgs::Marker::LINE_LIST;
+        marker.action = visualization_msgs::Marker::DELETE;
+        edges_pub_.publish( marker );
+    }
+
+    void RPRoadmapServer::start() {   
+        ros::spin();
     }
 
 } // close namespace
@@ -624,6 +653,7 @@ int main(int argc, char **argv) {
 
     ros::init(argc, argv, "rosplan_roadmap_server");
     KCL_rosplan::RPRoadmapServer rms;
+    // rms.start();
     ros::spin();
     return 0;
 }
