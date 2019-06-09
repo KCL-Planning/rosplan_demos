@@ -168,8 +168,6 @@ namespace KCL_rosplan {
          */
         void createPRM(nav_msgs::OccupancyGrid map, unsigned int nr_waypoints, double min_distance,
                 double casting_distance, double connecting_distance, int total_attempts);
-        
-        void start();
 
       private:
 

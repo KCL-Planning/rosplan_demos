@@ -642,18 +642,12 @@ namespace KCL_rosplan {
         marker.action = visualization_msgs::Marker::DELETE;
         edges_pub_.publish( marker );
     }
-
-    void RPRoadmapServer::start() {   
-        ros::spin();
-    }
-
 } // close namespace
 
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "rosplan_roadmap_server");
     KCL_rosplan::RPRoadmapServer rms;
-    // rms.start();
     ros::spin();
     return 0;
 }
