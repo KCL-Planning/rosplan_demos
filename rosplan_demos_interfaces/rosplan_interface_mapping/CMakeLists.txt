@@ -39,9 +39,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare cpp executables
-add_executable(rproadmapServer src/RPRoadmapServer.cpp)
-target_link_libraries(rproadmapServer ${catkin_LIBRARIES})
+# waypoint generation server
+add_executable(rp_roadmap_server src/RPRoadmapServer.cpp)
+target_link_libraries(rp_roadmap_server ${catkin_LIBRARIES})
 
 ##########
 ## Test ##
@@ -53,7 +53,7 @@ target_link_libraries(rproadmapServer ${catkin_LIBRARIES})
 ## Install ##
 #############
 
-install(TARGETS rproadmapServer
+install(TARGETS rp_roadmap_server
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

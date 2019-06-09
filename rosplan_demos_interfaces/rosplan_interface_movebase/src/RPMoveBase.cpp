@@ -29,9 +29,9 @@ namespace KCL_rosplan {
                     tf2::Quaternion q;
                     q.setRPY(0.0, 0.0, wp[2]);
                     result.pose.orientation.x = q[0];
-                    result.pose.orientation.x = q[1];
-                    result.pose.orientation.x = q[2];
-                    result.pose.orientation.x = q[3];
+                    result.pose.orientation.y = q[1];
+                    result.pose.orientation.z = q[2];
+                    result.pose.orientation.w = q[3];
 
                     return true;
                 }
@@ -48,18 +48,21 @@ namespace KCL_rosplan {
     // action dispatch callback
     bool RPMoveBase::concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg) {
 
-        // get waypoint ID from action dispatch
+        // get waypoint ID from action dispatch msg
         std::string wpID;
-        for(size_t i=0; i < msg->parameters.size(); i++) {
-            if(0 == msg->parameters[i].key.compare("to") or 0==msg->parameters[i].key.compare("w1")) {
-                // wp id found in param server
+        bool found = false;
+        // iterating over parameters (e.g. kenny, wp0, wp1)
+        for(size_t i = 0; i < msg->parameters.size(); i++) {
+            // check their keys
+            if(0 == msg->parameters[i].key.compare("to") or 0 == msg->parameters[i].key.compare("w1")) {
+                // wp id found in msg params
                 wpID = msg->parameters[i].value;
+                found = true;
             }
-            else {
-                // wp id not found in param server
-                ROS_INFO("KCL: (%s) aborting action dispatch; PDDL action missing required parameter ?to", params.name.c_str());
-                return false;
-            }
+        }
+        if(!found) {
+            ROS_INFO("KCL: (%s) aborting action dispatch; PDDL action missing required parameter ?to", params.name.c_str());
+            return false;
         }
 
         // get waypoint coordinates from its ID via query to parameter server

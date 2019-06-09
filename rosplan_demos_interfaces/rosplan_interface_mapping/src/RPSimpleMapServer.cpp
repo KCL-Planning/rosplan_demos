@@ -45,7 +45,6 @@ namespace KCL_rosplan {
         tf::Quaternion q;
         q.setEuler(theta, 0 ,0);
 
-
         pose.pose.orientation.x = q.x();
         pose.pose.orientation.y = q.z();
         pose.pose.orientation.w = q.w();

@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
   <name>rosplan_interface_mapping</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>
     Interface between ROSPlan and a PRM approach (Probabilistic RoadMap) for waypoint generation.
     Generate valid waypoints from a given map or load them from file.
     Waypoints are stored symbolically in the Knowledge Base.
-    Coordinates are stored in the parameter server
+    Coordinates are stored in the parameter server.
   </description>
 
   <maintainer email="michael.cashmore@kcl.ac.uk">Michael Cashmore</maintainer>

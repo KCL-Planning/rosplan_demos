@@ -1,6 +1,4 @@
 string id
 geometry_msgs/PoseStamped waypoint
 float32 connecting_distance
-int8 occupancy_threshold
 ---
-
