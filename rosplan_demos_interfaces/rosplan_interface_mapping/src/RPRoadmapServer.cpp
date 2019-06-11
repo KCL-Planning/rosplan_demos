@@ -20,6 +20,43 @@
 
 namespace KCL_rosplan {
 
+    /// Struct waypoint implementation
+    Waypoint::Waypoint() : wpID("wp_err"), grid_x(0), grid_y(0) {}
+
+    Waypoint::Waypoint(const std::string &id, unsigned int xCoord, unsigned int yCoord, const nav_msgs::MapMetaData& map_meta_data)
+            : wpID(id), grid_x(xCoord), grid_y(yCoord) {
+        occupancy_grid_utils::Cell cell;
+        cell.x = grid_x;
+        cell.y = grid_y;
+
+        geometry_msgs::Point real_point = occupancy_grid_utils::cellCenter(map_meta_data, cell);
+        real_x = real_point.x;
+        real_y = real_point.y;
+    }
+
+    float Waypoint::getDistance(const Waypoint& other) {
+        return sqrt((real_x - other.real_x) * (real_x - other.real_x) + (real_y - other.real_y) * (real_y - other.real_y));
+    }
+
+    void Waypoint::update(const Waypoint& other, float max_casting_range, const nav_msgs::MapMetaData& map_meta_data) {
+        float distance = getDistance(other);
+        if (distance > max_casting_range) {
+            float scale = max_casting_range / distance;
+
+            real_x = other.real_x + (real_x - other.real_x) * scale;
+            real_y = other.real_y + (real_y - other.real_y) * scale;
+            geometry_msgs::Point point;
+            point.x = real_x;
+            point.y = real_y;
+
+            occupancy_grid_utils::Cell cell = occupancy_grid_utils::pointCell(map_meta_data, point);
+            grid_x = cell.x;
+            grid_y = cell.y;
+        }
+    }
+
+    /// class RPRoadmapServer implementation
+    // constructor
     RPRoadmapServer::RPRoadmapServer() : nh_("~"), costmap_received_(false), srv_timeout_(3.0), occupancy_threshold_(10) {
 
         // get required parameters from param server

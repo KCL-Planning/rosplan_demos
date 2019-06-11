@@ -43,58 +43,41 @@ namespace KCL_rosplan {
 
     struct Waypoint
     {
-        Waypoint(const std::string &id, unsigned int xCoord, unsigned int yCoord, const nav_msgs::MapMetaData& map_meta_data)
-            : wpID(id), grid_x(xCoord), grid_y(yCoord) {
-            occupancy_grid_utils::Cell cell;
-            cell.x = grid_x;
-            cell.y = grid_y;
-
-            geometry_msgs::Point real_point = occupancy_grid_utils::cellCenter(map_meta_data, cell);
-            real_x = real_point.x;
-            real_y = real_point.y;
-        }
-
-        Waypoint()
-            : wpID("wp_err"), grid_x(0), grid_y(0) {}
+        /**
+         * @brief empty struct constructor, struct Waypoint used to store waypoints
+         */
+        Waypoint();
 
         /**
-         * Get the distance between this waypoint and @ref{other}.
-         * @param other The other waypoint to get the distance from.
-         * @return The distance between the waypoints.
+         * @brief constructor, struct Waypoint used to store waypoints
+         * @param id string waypoint unique identifier
+         * @param xCoord waypoint x coordinates in cell coordinates
+         * @param yCoord waypoint y coordinates in cell coordinates
+         * @param map_meta_data map information: resolution, width, height and origin
          */
-        float getDistance(const Waypoint& other) {
-            return sqrt((real_x - other.real_x) * (real_x - other.real_x) + (real_y - other.real_y) * (real_y - other.real_y));
-        }
+        Waypoint(const std::string &id, unsigned int xCoord, unsigned int yCoord, const nav_msgs::MapMetaData& map_meta_data);
 
         /**
-         * Update the location of this waypoint such that it's no furter than @ref{max_casting_range} away from @ref{other}.
-         * @param other Waypoint this waypoint was casted from.
-         * @param max_casting_range The maximum distance this waypoint can be from the given waypoint.
-         * @param resolution The resolution of the occupancy grid.
-         * @param origin The origin of the occupancy grid.
-         */
-        void update(const Waypoint& other, float max_casting_range, const nav_msgs::MapMetaData& map_meta_data) {
-            float distance = getDistance(other);
-            if (distance > max_casting_range) {
-                float scale = max_casting_range / distance;
+        * @brief Get the distance between this waypoint and @ref{other}.
+        * @param other The other waypoint to get the distance from.
+        * @return The distance between the waypoints.
+        */
+        float getDistance(const Waypoint& other);
 
-                real_x = other.real_x + (real_x - other.real_x) * scale;
-                real_y = other.real_y + (real_y - other.real_y) * scale;
-                geometry_msgs::Point point;
-                point.x = real_x;
-                point.y = real_y;
+        /**
+        * @brief Update the location of this waypoint such that it's no furter than @ref{max_casting_range} away from @ref{other}.
+        * @param other The Waypoint this waypoint was casted from.
+        * @param max_casting_range The maximum distance this waypoint can be from the given waypoint.
+        * @param resolution The resolution of the occupancy grid.
+        * @param origin The origin of the occupancy grid.
+        */
+        void update(const Waypoint& other, float max_casting_range, const nav_msgs::MapMetaData& map_meta_data);
 
-                occupancy_grid_utils::Cell cell = occupancy_grid_utils::pointCell(map_meta_data, point);
-                grid_x = cell.x;
-                grid_y = cell.y;
-            }
-        }
-
-        std::string wpID;
         int grid_x;
         int grid_y;
         double real_x;
         double real_y;
+        std::string wpID;
         std::vector<std::string> neighbours;
     }; // end of struct Waypoint
 
