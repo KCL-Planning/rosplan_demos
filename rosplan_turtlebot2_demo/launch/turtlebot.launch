@@ -18,7 +18,7 @@
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" />
 
     <!-- upload waypoints (dictionary, id:coordinates) to param server from yaml file -->
-    <rosparam command="load" ns="rosplan_demo_waypoints" file="$(find rosplan_turtlebot2_demo)/config/waypoints.yaml"/>
+    <rosparam command="load" file="$(find rosplan_turtlebot2_demo)/config/waypoints.yaml"/>
 
     <!-- ROSPlan -->
     <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
