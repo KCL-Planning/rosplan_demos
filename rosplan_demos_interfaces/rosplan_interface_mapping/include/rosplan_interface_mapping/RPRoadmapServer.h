@@ -20,6 +20,7 @@
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/GetMap.h>
@@ -96,6 +97,12 @@ namespace KCL_rosplan {
 
         RPRoadmapServer();
 
+        /**
+         * @brief check if wps are available in param server, if so, load them in symbolic KB and visualise them
+         * @return True if waypoints were found in param server and are in list format, False otherwise
+         */
+        bool loadParams();
+
         /** 
          * @brief callback that gets executed upon receiving a odom msg, this is used to get the robot pose
          * @param msg the odom information is encoded in this variable and its value comes from the ROS network
@@ -129,7 +136,14 @@ namespace KCL_rosplan {
          * @param req the request msg from the user
          * @param res the response that we need to fill and provide to the user as feedback
          */
-        bool addWaypoint(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res);
+        bool addWaypointSrv(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res);
+
+        /**
+         * @brief Create new waypoint and stores it in the knowledge base
+         * @param store_in_param_server if true, the parameter will be installed on param server
+         * @return true for success, false otherwise
+         */
+        bool addWaypoint(std::string id, geometry_msgs::PoseStamped waypoint, float connecting_distance, bool store_in_param_server);
 
         /**
          * @brief Callback function provided by this server node, when user makes a request to remove a waypoint
@@ -191,14 +205,17 @@ namespace KCL_rosplan {
         geometry_msgs::PoseStamped base_odom_;
         tf::TransformListener tf_;
 
-        // how much to wait in seconds for the costmap and KB update services
+        /// how much to wait in seconds for the costmap and KB update services
         int srv_timeout_;
-        // threshold for a costmap cell to be considered occupied
+        /// threshold for a costmap cell to be considered occupied
         int occupancy_threshold_;
 
-        // Roadmap
+        /// Roadmap
         std::map<std::string, Waypoint*> waypoints_;
         std::vector<Edge> edges_;
+
+        /// to store the namespace in which the waypoints are stored in the parameter server
+        std::string wp_namespace_;
 
     };
 }
