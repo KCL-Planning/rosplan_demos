@@ -100,6 +100,16 @@ namespace KCL_rosplan {
 
         ROS_INFO("Found waypoints in param server, will load them now into KB");
 
+        // ensure there is costmap data before proceeding (every 2 seconds)
+        ros::Rate loop_rate(0.5);
+        while(!costmap_received_ && ros::ok()) {
+            ROS_WARN("Costmap not received, ensure that costmap topic has data (default topic: /move_base/global_costmap/costmap)");
+            ROS_INFO("Checking for costmap data at 0.5 hz...");
+            loop_rate.sleep();
+            // listen to callbacks
+            ros::spinOnce();
+        }
+
         // get all waypoints under a namespace
         XmlRpc::XmlRpcValue waypoints;
 
@@ -548,18 +558,24 @@ namespace KCL_rosplan {
 
             std::cout << "Try to connect " << new_wp->wpID << " to " << other_wp->wpID << "." << std::endl;
 
-            if (new_wp->getDistance(*other_wp) < connecting_distance && canConnect(p1, p2)) {
-                new_wp->neighbours.push_back(other_wp->wpID);
-                other_wp->neighbours.push_back(new_wp->wpID);
-                Edge e(new_wp->wpID, other_wp->wpID);
-                edges_.push_back(e);
-            } else {
-                std::cout << "Do not connect these waypoints because: ";
-                if (new_wp->getDistance(*other_wp) < connecting_distance) {
-                    std::cout << "collision detected." << std::endl;
+            try {
+                if (new_wp->getDistance(*other_wp) < connecting_distance && canConnect(p1, p2)) {
+                    new_wp->neighbours.push_back(other_wp->wpID);
+                    other_wp->neighbours.push_back(new_wp->wpID);
+                    Edge e(new_wp->wpID, other_wp->wpID);
+                    edges_.push_back(e);
                 } else {
-                    std::cout << "the distance between them is too large. " << new_wp->getDistance(*other_wp) << ">= " <<  connecting_distance << "." << std::endl;
+                    std::cout << "Do not connect these waypoints because: ";
+                    if (new_wp->getDistance(*other_wp) < connecting_distance)
+                        std::cout << "collision detected." << std::endl;
+                    else
+                        std::cout << "the distance between them is too large. " << new_wp->getDistance(*other_wp) << ">= " <<  connecting_distance << "." << std::endl;
                 }
+            }
+            catch (const std::exception& e) {
+                ROS_WARN("Failed to connect waypoint, skipping %s", id.c_str());
+                ROS_ERROR("Error: %s", e.what());
+                return false;
             }
         }
 
