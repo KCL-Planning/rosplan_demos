@@ -32,6 +32,7 @@
 #include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
 #include <occupancy_grid_utils/ray_tracer.h>
 #include <occupancy_grid_utils/coordinate_conversions.h>
+#include <std_srvs/Trigger.h>
 
 #include "rosplan_interface_mapping/CreatePRM.h"
 #include "rosplan_interface_mapping/AddWaypoint.h"
@@ -154,6 +155,15 @@ namespace KCL_rosplan {
         bool removeWaypoint(rosplan_interface_mapping::RemoveWaypoint::Request &req, rosplan_interface_mapping::RemoveWaypoint::Response &res);
 
         /**
+         * @brief Service provided by this node to let know the RoadmapServer iterface that waypoints have been loaded in param server
+         * and trigger loading them into symbolic KB + visualisation via rviz
+         * @param req empty request
+         * @param res bool success - indicate successful run of triggered service, string message - information for error msgs
+         * @return true if success, false otherwise
+         */
+        bool loadWaypoints(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
+
+        /**
          * @brief Waypoint generation function, deletes all previous data and generates a new waypoint set
          * @param map the costmap expressing the occupied and free cells of the map such that we do not
          * generate waypoints on top of occupied cells
@@ -197,7 +207,7 @@ namespace KCL_rosplan {
         /// services that this node will query
         ros::ServiceClient update_kb_client_, get_map_client_;
         /// services that are offered by this node
-        ros::ServiceServer remove_waypoint_service_server_, waypoint_service_server_, prm_service_server_;
+        ros::ServiceServer remove_waypoint_service_server_, waypoint_service_server_, prm_service_server_, load_wp_service_server_;
 
         bool use_static_map_, costmap_received_;
         std::string wp_reference_frame_;

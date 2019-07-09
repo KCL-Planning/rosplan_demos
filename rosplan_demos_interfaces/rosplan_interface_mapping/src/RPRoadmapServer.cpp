@@ -82,6 +82,9 @@ namespace KCL_rosplan {
         remove_waypoint_service_server_ = nh_.advertiseService("/kcl_rosplan/rosplan_roadmap_server/remove_waypoint",
                                                                 &RPRoadmapServer::removeWaypoint, this);
 
+        load_wp_service_server_ = nh_.advertiseService("/kcl_rosplan/rosplan_roadmap_server/load_waypoints",
+                                                                &RPRoadmapServer::loadWaypoints, this);
+
         // services required by this node, to update rosplan KB and to query map from server
         update_kb_client_ = nh_.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/rosplan_knowledge_base/update");
         get_map_client_ = nh_.serviceClient<nav_msgs::GetMap>("/static_map");
@@ -679,6 +682,11 @@ namespace KCL_rosplan {
         ROS_INFO("KCL: (RPRoadmapServer) Successfully removed waypoint from param server and rosplan KB.");
 
         // srv call executed succesfully
+        return true;
+    }
+
+    bool RPRoadmapServer::loadWaypoints(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
+        res.success = loadParams();
         return true;
     }
 
