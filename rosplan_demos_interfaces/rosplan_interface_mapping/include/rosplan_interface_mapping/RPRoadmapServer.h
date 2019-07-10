@@ -124,6 +124,11 @@ namespace KCL_rosplan {
         void uploadWPToParamServer(std::string wp_id, geometry_msgs::PoseStamped pose);
 
         /**
+         * @brief add the fact that kenny is at wp0
+         */
+        void update_robot_position();
+
+        /**
          * @brief Callback function provided by this server node, when user makes a request to generate a roadmap
          * @param req the request msg from the user, contains the parameters specified by the user from which the node
          * will generate the waypoints

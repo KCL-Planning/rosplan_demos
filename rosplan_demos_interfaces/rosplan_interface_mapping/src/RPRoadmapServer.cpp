@@ -195,6 +195,9 @@ namespace KCL_rosplan {
             return false;
         }
 
+        // add fact : (robot_at kenny wp0)
+        update_robot_position();
+
         return true;
     }
 
@@ -246,6 +249,22 @@ namespace KCL_rosplan {
         pose_as_array.push_back(waypoint.pose.position.y);
         pose_as_array.push_back(yaw);
         nh_.setParam(wp_namespace_ + "/" + wp_id, pose_as_array);
+    }
+
+    void RPRoadmapServer::update_robot_position() {
+        // robot start position
+        rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
+        updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+        updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+        updateSrv.request.knowledge.attribute_name = "robot_at";
+        diagnostic_msgs::KeyValue pair1, pair2;
+        pair1.key = "v";
+        pair1.value = "kenny";
+        updateSrv.request.knowledge.values.push_back(pair1);
+        pair2.key = "wp";
+        pair2.value = "wp0";
+        updateSrv.request.knowledge.values.push_back(pair2);
+        update_kb_client_.call(updateSrv);
     }
 
     bool RPRoadmapServer::generateRoadmap(rosplan_interface_mapping::CreatePRM::Request &req, rosplan_interface_mapping::CreatePRM::Response &res) {
@@ -370,18 +389,8 @@ namespace KCL_rosplan {
             uploadWPToParamServer(wit->first, pose); // waypoint id, pose
         }
 
-        // robot start position
-        updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-        updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
-        updateSrv.request.knowledge.attribute_name = "robot_at";
-        diagnostic_msgs::KeyValue pair1, pair2;
-        pair1.key = "v";
-        pair1.value = "kenny";
-        updateSrv.request.knowledge.values.push_back(pair1);
-        pair2.key = "wp";
-        pair2.value = "wp0";
-        updateSrv.request.knowledge.values.push_back(pair2);
-        update_kb_client_.call(updateSrv);
+        // add fact : (robot_at kenny wp0)
+        update_robot_position();
 
         // publish waypoint graph as markers for visualisation purposes
         pubWPGraph();
