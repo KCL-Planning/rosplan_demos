@@ -1,0 +1,51 @@
+(define (problem task)
+(:domain turtlebot_demo)
+(:objects
+    wp0 wp1 wp2 wp3 - waypoint
+    kenny - robot
+)
+(:init
+    (robot_at kenny wp0)
+
+    (connected wp0 wp0)
+    (connected wp1 wp0)
+    (connected wp0 wp1)
+    (connected wp1 wp1)
+    (connected wp2 wp0)
+    (connected wp0 wp2)
+    (connected wp2 wp1)
+    (connected wp1 wp2)
+    (connected wp2 wp2)
+    (connected wp3 wp0)
+    (connected wp0 wp3)
+    (connected wp3 wp1)
+    (connected wp1 wp3)
+    (connected wp3 wp2)
+    (connected wp2 wp3)
+    (connected wp3 wp3)
+
+
+    (= (distance wp0 wp0) 0)
+    (= (distance wp1 wp0) 1)
+    (= (distance wp0 wp1) 1)
+    (= (distance wp1 wp1) 0)
+    (= (distance wp2 wp0) 1)
+    (= (distance wp0 wp2) 1)
+    (= (distance wp2 wp1) 1.41421)
+    (= (distance wp1 wp2) 1.41421)
+    (= (distance wp2 wp2) 0)
+    (= (distance wp3 wp0) 1.41421)
+    (= (distance wp0 wp3) 1.41421)
+    (= (distance wp3 wp1) 1)
+    (= (distance wp1 wp3) 1)
+    (= (distance wp3 wp2) 1)
+    (= (distance wp2 wp3) 1)
+    (= (distance wp3 wp3) 0)
+
+)
+(:goal (and
+    (visited wp1)
+    (visited wp2)
+    (visited wp3)
+))
+)
