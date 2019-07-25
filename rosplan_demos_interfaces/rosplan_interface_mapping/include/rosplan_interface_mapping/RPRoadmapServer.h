@@ -20,6 +20,7 @@
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/GetMap.h>
@@ -31,6 +32,7 @@
 #include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
 #include <occupancy_grid_utils/ray_tracer.h>
 #include <occupancy_grid_utils/coordinate_conversions.h>
+#include <std_srvs/Trigger.h>
 
 #include "rosplan_interface_mapping/CreatePRM.h"
 #include "rosplan_interface_mapping/AddWaypoint.h"
@@ -96,6 +98,12 @@ namespace KCL_rosplan {
 
         RPRoadmapServer();
 
+        /**
+         * @brief check if wps are available in param server, if so, load them in symbolic KB and visualise them
+         * @return True if waypoints were found in param server and are in list format, False otherwise
+         */
+        bool loadParams();
+
         /** 
          * @brief callback that gets executed upon receiving a odom msg, this is used to get the robot pose
          * @param msg the odom information is encoded in this variable and its value comes from the ROS network
@@ -116,6 +124,11 @@ namespace KCL_rosplan {
         void uploadWPToParamServer(std::string wp_id, geometry_msgs::PoseStamped pose);
 
         /**
+         * @brief add the fact that kenny is at wp0
+         */
+        void update_robot_position();
+
+        /**
          * @brief Callback function provided by this server node, when user makes a request to generate a roadmap
          * @param req the request msg from the user, contains the parameters specified by the user from which the node
          * will generate the waypoints
@@ -129,7 +142,14 @@ namespace KCL_rosplan {
          * @param req the request msg from the user
          * @param res the response that we need to fill and provide to the user as feedback
          */
-        bool addWaypoint(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res);
+        bool addWaypointSrv(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res);
+
+        /**
+         * @brief Create new waypoint and stores it in the knowledge base
+         * @param store_in_param_server if true, the parameter will be installed on param server
+         * @return true for success, false otherwise
+         */
+        bool addWaypoint(std::string id, geometry_msgs::PoseStamped waypoint, float connecting_distance, bool store_in_param_server);
 
         /**
          * @brief Callback function provided by this server node, when user makes a request to remove a waypoint
@@ -138,6 +158,15 @@ namespace KCL_rosplan {
          * @param res the response that we need to fill and provide to the user as feedback
          */
         bool removeWaypoint(rosplan_interface_mapping::RemoveWaypoint::Request &req, rosplan_interface_mapping::RemoveWaypoint::Response &res);
+
+        /**
+         * @brief Service provided by this node to let know the RoadmapServer iterface that waypoints have been loaded in param server
+         * and trigger loading them into symbolic KB + visualisation via rviz
+         * @param req empty request
+         * @param res bool success - indicate successful run of triggered service, string message - information for error msgs
+         * @return true if success, false otherwise
+         */
+        bool loadWaypoints(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 
         /**
          * @brief Waypoint generation function, deletes all previous data and generates a new waypoint set
@@ -183,7 +212,7 @@ namespace KCL_rosplan {
         /// services that this node will query
         ros::ServiceClient update_kb_client_, get_map_client_;
         /// services that are offered by this node
-        ros::ServiceServer remove_waypoint_service_server_, waypoint_service_server_, prm_service_server_;
+        ros::ServiceServer remove_waypoint_service_server_, waypoint_service_server_, prm_service_server_, load_wp_service_server_;
 
         bool use_static_map_, costmap_received_;
         std::string wp_reference_frame_;
@@ -191,14 +220,17 @@ namespace KCL_rosplan {
         geometry_msgs::PoseStamped base_odom_;
         tf::TransformListener tf_;
 
-        // how much to wait in seconds for the costmap and KB update services
+        /// how much to wait in seconds for the costmap and KB update services
         int srv_timeout_;
-        // threshold for a costmap cell to be considered occupied
+        /// threshold for a costmap cell to be considered occupied
         int occupancy_threshold_;
 
-        // Roadmap
+        /// Roadmap
         std::map<std::string, Waypoint*> waypoints_;
         std::vector<Edge> edges_;
+
+        /// to store the namespace in which the waypoints are stored in the parameter server
+        std::string wp_namespace_;
 
     };
 }

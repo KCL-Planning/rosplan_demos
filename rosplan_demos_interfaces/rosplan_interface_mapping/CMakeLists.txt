@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rosplan_knowledge_msgs
   nav_msgs
+  std_srvs
   geometry_msgs
   diagnostic_msgs
   visualization_msgs
