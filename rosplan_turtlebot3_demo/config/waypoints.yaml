@@ -1,0 +1,9 @@
+rosplan_demo_waypoints:
+    # waypoints reference frame
+    waypoint_frameid: map
+
+    # waypoint 2D coordinates: x, y, theta
+    wp0: [0.0, 0.0, 0.0]
+    wp1: [0.0, -1.0, 0.0]
+    wp2: [-1.0, 0.0, 0.0]
+    wp3: [-1.0, -1.0, 0.0]
