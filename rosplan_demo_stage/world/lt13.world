@@ -1,0 +1,52 @@
+define floorplan model
+(
+  # sombre, sensible, artistic
+  color "gray30"
+
+  # most maps will need a bounding box
+  boundary 1
+
+  gui_nose 0
+  gui_grid 0
+  gui_move 0
+  gui_outline 1
+  gripper_return 0
+  fiducial_return 0
+  ranger_return 1
+)
+
+floorplan
+(
+   bitmap "lt13.pgm"
+   # image: 556 1029, resolution 0.05
+   size [27.800 51.450 1.000]
+)
+
+define topurg ranger
+(
+  sensor( 			
+    range [ 0.0  30.0 ]
+    fov 160.000
+    samples 500
+  )
+  color "black"
+  size [ 0.050 0.050 0.100 ]
+)
+
+define erratic position
+(
+  size [0.350 0.350 0.250]
+  origin [-0.050 0.000 0.000 0.000]
+  gui_nose 1
+  drive "diff"
+  topurg(pose [ 0.050 0.000 0.000 0.000 ])
+)
+
+# throw in a robot
+erratic( pose [ 0.000 10.275 0.000 0.000 ] name "era" color "blue")
+
+window
+(
+   size [826.000 1170.000]
+   show_data 1
+)

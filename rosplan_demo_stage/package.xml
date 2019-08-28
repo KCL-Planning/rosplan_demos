@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>rosplan_demo_stage</name>
+  <version>1.0.0</version>
+  <description>
+    Simple simulation with turtlebot3 in stage.
+  </description>
+  <maintainer email="michael.cashmore@kcl.ac.uk">Michael Cashmore</maintainer>
+
+  <license>BSD</license>
+  <url type="website">http://github.com/KCL-Planning/rosplan_demos</url>
+  <author email="michael.cashmore@kcl.ac.uk">Michael Cashmore</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
