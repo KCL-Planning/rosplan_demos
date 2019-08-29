@@ -45,18 +45,21 @@
     </include>
 
     <!-- roadmap (random waypoint generation) -->
-    <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" />
+    <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
+        <arg name="use_static_map" value="false" />
+        <arg name="update_waypoints" value="true" />
+        <arg name="update_connectivity" value="false" />
+    </include>
 
     <!-- ROSPlan -->
     <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
-        <arg name="domain_path" value="$(find rosplan_turtlebot3_demo)/common/domain_turtlebot_demo.pddl" />
+        <arg name="domain_path" value="$(find rosplan_demo_stage)/pddl/domain_turtlebot_demo.pddl" />
         <!-- load a particular initial state into KB at startup (optional) -->
-        <!-- we leave it empty because in this demo we use a bash script to upload information to KB, not a pddl problem -->
-        <arg name="problem_path" value="" />
+        <arg name="problem_path" value="$(find rosplan_demo_stage)/pddl/problem_turtlebot_demo.pddl" />
         <!-- automatically generated pddl problem will be created here -->
-        <arg name="autom_gen_problem_path" value="$(find rosplan_turtlebot3_demo)/common/problem.pddl" />
+        <arg name="autom_gen_problem_path" value="$(find rosplan_demo_stage)/pddl/generated_problem.pddl" />
         <!-- planner will produce output plan and write to this location -->
-        <arg name="data_path" value="$(find rosplan_turtlebot3_demo)/common/" />
+        <arg name="data_path" value="$(find rosplan_demo_stage)/pddl/" />
     </include>
 
     <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
@@ -69,6 +72,5 @@
     </node>
 
     <!-- visualisation of robot sensor data -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_turtlebot3_demo)/config/turtlebot3.rviz" />
-
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_demo_stage)/config/turtlebot3.rviz" />
 </launch>

@@ -26,10 +26,12 @@
 #include <nav_msgs/GetMap.h>
 #include <diagnostic_msgs/KeyValue.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Point.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <rosplan_knowledge_msgs/KnowledgeItem.h>
 #include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
+#include <rosplan_knowledge_msgs/KnowledgeUpdateServiceArray.h>
 #include <occupancy_grid_utils/ray_tracer.h>
 #include <occupancy_grid_utils/coordinate_conversions.h>
 #include <std_srvs/Trigger.h>
@@ -70,8 +72,7 @@ namespace KCL_rosplan {
         * @brief Update the location of this waypoint such that it's no furter than @ref{max_casting_range} away from @ref{other}.
         * @param other The Waypoint this waypoint was casted from.
         * @param max_casting_range The maximum distance this waypoint can be from the given waypoint.
-        * @param resolution The resolution of the occupancy grid.
-        * @param origin The origin of the occupancy grid.
+        * @param map_meta_data The meta data of the occupancy grid.
         */
         void update(const Waypoint& other, float max_casting_range, const nav_msgs::MapMetaData& map_meta_data);
 
@@ -89,7 +90,7 @@ namespace KCL_rosplan {
 
         std::string start;
         std::string end;
-    };
+    }; // end of struct Edge
 
     class RPRoadmapServer
     {
@@ -122,11 +123,6 @@ namespace KCL_rosplan {
          * @param pose x, y, theta coordinates and reference frame of the waypoint encoded as pose stamped msg
          */
         void uploadWPToParamServer(std::string wp_id, geometry_msgs::PoseStamped pose);
-
-        /**
-         * @brief add the fact that kenny is at wp0
-         */
-        void update_robot_position();
 
         /**
          * @brief Callback function provided by this server node, when user makes a request to generate a roadmap
@@ -178,8 +174,7 @@ namespace KCL_rosplan {
          * @param connecting_distance the maximum distance that can exists between waypoints for them to be considered connected
          * @param total_attempts maximum amount of attempts to generate random valid waypoints
          */
-        void createPRM(nav_msgs::OccupancyGrid map, unsigned int nr_waypoints, double min_distance,
-                double casting_distance, double connecting_distance, int total_attempts);
+        void createPRM(nav_msgs::OccupancyGrid &map, unsigned int nr_waypoints, double min_distance, double casting_distance, double connecting_distance, double occupancy_threshold, int total_attempts);
 
       private:
 
@@ -197,7 +192,7 @@ namespace KCL_rosplan {
         * @param w2 The second waypoint.
         * @return True if the waypoints can be connected, false otherwise.
         */
-        bool canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2) const;
+        bool canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2, nav_msgs::OccupancyGrid &map, double occupancy_threshold);
 
         /// visualisation functions
         void pubWPGraph();
@@ -210,11 +205,14 @@ namespace KCL_rosplan {
         /// topics that this node offers
         ros::Publisher waypoints_pub_, edges_pub_; // for visualisation purposes
         /// services that this node will query
-        ros::ServiceClient update_kb_client_, get_map_client_;
+        ros::ServiceClient update_kb_client_, update_kb_client_array_, get_map_client_;
         /// services that are offered by this node
         ros::ServiceServer remove_waypoint_service_server_, waypoint_service_server_, prm_service_server_, load_wp_service_server_;
 
-        bool use_static_map_, costmap_received_;
+        /// topic and service names
+        std::string costmap_topic_;
+
+        bool use_static_map_, costmap_received_, update_connectivity_, update_waypoints_;
         std::string wp_reference_frame_;
         nav_msgs::OccupancyGrid cost_map_;
         geometry_msgs::PoseStamped base_odom_;

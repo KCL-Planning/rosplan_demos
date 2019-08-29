@@ -2,22 +2,21 @@
 <launch>
 
     <!-- NOTE: This is an example launch file, please do not modify -->
-
     <!-- roadmap server offers a service for random valid waypoint generation,
          the waypoint coordinates are stored in parameter server and symbolically in rosplan KB -->
 
+    <!-- arguments -->
     <arg name="node_name" default="rosplan_roadmap_server" />
-    <arg name="costmap_topic" default="/move_base/global_costmap/costmap" />
+    <arg name="wp_namespace" default="/rosplan_demo_waypoints" />
     <arg name="odom_topic" default="/odom" />
-
-    <!-- query a map from a server, specify the server service name here -->
-    <arg name="get_map_srv_name" default="/static_map" />
 
     <!-- not commonly used but you could distinguish between multiple KB using this parameter -->
     <arg name="rosplan_kb_name" default="rosplan_knowledge_base" />
 
     <!-- if true, map will be queried via service call to map server node in /static_map -->
     <arg name="use_static_map" default="false" />
+    <arg name="get_map_srv_name" default="/static_map" />
+    <arg name="costmap_topic" default="/move_base/global_costmap/costmap" />
 
     <!-- the reference frame in which the map coordinates are expressed -->
     <arg name="wp_reference_frame" default="/map" />
@@ -26,27 +25,31 @@
     <arg name="srv_timeout" default="3.0" />
 
     <!-- threshold for a costmap cell to be considered occupied -->
-    <arg name="occupancy_threshold" default="10" />
+    <arg name="occupancy_threshold" default="90" />
+
+    <!-- add instances, facts and functions to KB -->
+    <arg name="update_waypoints" default="true" />
+    <arg name="update_connectivity" default="true" />
 
     <!-- waypoint generation node (roadmap) -->
     <node pkg="rosplan_interface_mapping" name="$(arg node_name)" type="rp_roadmap_server" output="screen">
-        <!-- topics needed by this node, subscriptions -->
-        <remap from="/move_base/global_costmap/costmap" to="$(arg costmap_topic)" />
-        <remap from="/odom" to="$(arg odom_topic)" />
 
-        <!-- srvs offered by this node -->
-        <remap from="/kcl_rosplan/rosplan_roadmap_server/create_prm" to="/kcl_rosplan/$(arg node_name)/create_prm" />
-        <remap from="/kcl_rosplan/rosplan_roadmap_server/add_waypoint" to="/kcl_rosplan/$(arg node_name)/add_waypoint" />
-        <remap from="/kcl_rosplan/rosplan_roadmap_server/remove_waypoint" to="/kcl_rosplan/$(arg node_name)/remove_waypoint" />
-
-        <!-- srvs needed by this node -->
-        <remap from="/static_map" to="$(arg get_map_srv_name)" /> <!-- srv to get map -->
-        <remap from="/rosplan_knowledge_base/update" to="/$(arg rosplan_kb_name)/update" />
-
-        <param name="use_static_map" value="$(arg use_static_map)" />
-        <param name="wp_reference_frame" value="$(arg wp_reference_frame)" />
-        <param name="srv_timeout" value="$(arg srv_timeout)" />
+        <!-- params -->
+        <param name="use_static_map"      value="$(arg use_static_map)" />
+        <param name="wp_reference_frame"  value="$(arg wp_reference_frame)" />
+        <param name="srv_timeout"         value="$(arg srv_timeout)" />
         <param name="occupancy_threshold" value="$(arg occupancy_threshold)" />
+        <param name="wp_namespace"        value="$(arg wp_namespace)" />
+        <param name="update_waypoints"    value="$(arg update_waypoints)" />
+        <param name="update_connectivity" value="$(arg update_connectivity)" />
+
+        <!-- knowledge base -->
+        <param name="rosplan_kb_name" value="$(arg rosplan_kb_name)" />
+
+        <!-- subscriptions and services -->
+        <param name="costmap_topic"    value="$(arg costmap_topic)" />
+        <param name="odom_topic"       value="$(arg odom_topic)" />
+        <param name="get_map_srv_name" value="$(arg get_map_srv_name)" /> <!-- srv to get map -->
     </node>
 
 </launch>
