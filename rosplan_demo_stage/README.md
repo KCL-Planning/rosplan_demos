@@ -40,7 +40,7 @@ roslaunch rosplan_demo_stage lt13.launch
 
 *3.* In a second terminal generate the probabilistic roadmap using a service call to the `rosplan_roadmap_server`:
 ```
-rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 75, min_distance: 1.2, casting_distance: 2.4, connecting_distance: 4.8, occupancy_threshold: 90, total_attempts: 100000}"
+rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 75, min_distance: 1.2, casting_distance: 2.4, connecting_distance: 4.8, occupancy_threshold: 50, total_attempts: 100000}"
 ```
 This service call uses the following parameters:
 - `nr_waypoints`: The number of waypints to attempt to generate (75).
