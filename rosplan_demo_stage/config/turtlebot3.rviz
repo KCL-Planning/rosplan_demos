@@ -5,8 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /localisation1/LaserScan1
-        - /navigation1/Local Map1
-        - /navigation1/Global Map1/global costmap1
       Splitter Ratio: 0.5055555701255798
     Tree Height: 724
   - Class: rviz/Selection
@@ -119,6 +117,16 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: costmap
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /costmap
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
     - Class: rviz/Group
       Displays:
         - Alpha: 1
@@ -220,7 +228,7 @@ Visualization Manager:
           Displays:
             - Alpha: 0.5
               Class: rviz/Map
-              Color Scheme: raw
+              Color Scheme: map
               Draw Behind: true
               Enabled: true
               Name: global costmap
@@ -276,21 +284,6 @@ Visualization Manager:
               Value: true
           Enabled: true
           Name: Global Map
-        - Alpha: 1
-          Axes Length: 1
-          Axes Radius: 0.10000000149011612
-          Class: rviz/Pose
-          Color: 255; 25; 0
-          Enabled: true
-          Head Length: 0.30000001192092896
-          Head Radius: 0.10000000149011612
-          Name: next goal
-          Shaft Length: 0.5
-          Shaft Radius: 0.05000000074505806
-          Shape: Arrow
-          Topic: /move_base_simple/goal
-          Unreliable: false
-          Value: true
       Enabled: true
       Name: navigation
     - Class: rviz/Group
@@ -344,7 +337,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: -3.725290298461914e-8
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -354,11 +347,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 27.306529998779297
+      Scale: 20.47381019592285
       Target Frame: base_footprint
       Value: TopDownOrtho (rviz)
-      X: 0
-      Y: 0
+      X: 1.699549913406372
+      Y: -9.970148086547852
     Saved: ~
 Window Geometry:
   Displays:

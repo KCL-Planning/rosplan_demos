@@ -59,6 +59,7 @@ namespace KCL_rosplan {
 
         /// waypoints reference frame
         std::string waypoint_frameid_;
+        std::string wp_namespace_;
     };
 }
 #endif

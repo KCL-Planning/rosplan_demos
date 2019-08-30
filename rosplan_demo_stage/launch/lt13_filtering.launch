@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<launch>
+
+    <param name="/use_sim_time" value="true"/>
+
+    <!-- Arguments -->
+    <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="map_file" default="$(find rosplan_demo_stage)/maps/lt13.yaml"/>
+    <arg name="common_param_file" default="$(find rosplan_demo_stage)/config/costmap_common_params_waffle.yaml"/>
+    <arg name="local_param_file" default="$(find rosplan_demo_stage)/config/local_costmap_params.yaml"/>
+    <arg name="global_param_file" default="$(find rosplan_demo_stage)/config/global_costmap_params.yaml"/>
+
+
+    <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/lt13.world" respawn="false" output="screen">
+    </node>
+
+    <!-- Map server -->
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+        <arg name="model" value="$(arg model)" />
+    </include>
+
+    <!-- move_base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+        <rosparam file="$(arg common_param_file)" command="load" ns="global_costmap" />
+        <rosparam file="$(arg local_param_file)" command="load" />
+        <rosparam file="$(arg global_param_file)" command="load" />
+        <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load" />
+        <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
+        <remap from="cmd_vel" to="/cmd_vel"/>
+        <remap from="odom" to="odom"/>
+        <param name="DWAPlannerROS/min_vel_x" value="0.0" if="false" />
+    </node>
+
+    <!-- AMCL -->
+    <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
+        <arg name="scan_topic" value="base_scan" />
+        <!-- initial values match the stage world file -->
+        <arg name="initial_pose_x" value="13.900"/>
+        <arg name="initial_pose_y" value="36.000"/>
+        <arg name="initial_pose_a" value="0.000"/>
+    </include>
+
+    <!-- roadmap (random waypoint generation) -->
+    <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
+        <arg name="use_static_map" value="false" />
+        <arg name="update_waypoints" value="false" />
+        <arg name="update_connectivity" value="false" />
+    </include>
+
+    <!-- waypoint filtering node (roadmap) -->
+    <node pkg="rosplan_interface_mapping" name="roadmap_filter" type="rp_roadmap_filter" output="screen">
+        <param name="srv_timeout"         value="6" />
+        <param name="waypoint_count"      value="20" />
+        <param name="wp_reference_frame"  value="map" />
+        <param name="wp_namespace_input"  value="/rosplan_demo_waypoints" />
+        <param name="wp_namespace_output" value="/filtered_waypoints" />
+        <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+        <param name="costmap_topic"       value="/costmap" />
+    </node>
+
+    <!-- hidden costmaps -->
+    <node pkg="rosplan_interface_mapping" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
+        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_1.yaml" command="load" />
+    </node>
+
+
+    <!-- ROSPlan -->
+    <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
+        <arg name="domain_path" value="$(find rosplan_demo_stage)/pddl/domain_turtlebot_demo.pddl" />
+        <!-- load a particular initial state into KB at startup (optional) -->
+        <arg name="problem_path" value="$(find rosplan_demo_stage)/pddl/problem_turtlebot_demo.pddl" />
+        <!-- automatically generated pddl problem will be created here -->
+        <arg name="autom_gen_problem_path" value="$(find rosplan_demo_stage)/pddl/generated_problem.pddl" />
+        <!-- planner will produce output plan and write to this location -->
+        <arg name="data_path" value="$(find rosplan_demo_stage)/pddl/" />
+    </include>
+
+    <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
+    <node pkg="rosplan_interface_movebase" type="rpmovebase" name="rosplan_interface_movebase" respawn="false" output="screen">
+        <param name="wp_namespace"          value="/filtered_waypoints" />
+        <param name="knowledge_base"        value="rosplan_knowledge_base" />
+        <param name="action_server"         value="/move_base" />
+        <param name="pddl_action_name"      value="goto_waypoint" />
+        <param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
+        <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
+    </node>
+
+    <!-- visualisation of robot sensor data -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_demo_stage)/config/turtlebot3.rviz" />
+
+</launch>
