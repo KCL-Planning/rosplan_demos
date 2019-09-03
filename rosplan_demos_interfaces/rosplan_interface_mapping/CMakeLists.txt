@@ -42,6 +42,7 @@ include_directories(
 
 # waypoint generation server
 add_executable(rp_roadmap_server src/RPRoadmapServer.cpp)
+add_dependencies(rp_roadmap_server rosplan_interface_mapping_generate_messages_cpp)
 target_link_libraries(rp_roadmap_server ${catkin_LIBRARIES})
 
 # waypoint filter
