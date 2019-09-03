@@ -780,9 +780,9 @@ namespace KCL_rosplan {
         node_marker.pose.orientation.y = 0.0;
         node_marker.pose.orientation.z = 0.0;
         node_marker.pose.orientation.w = 1.0;
-        node_marker.scale.x = 0.5f;
-        node_marker.scale.y = 0.5f;
-        node_marker.scale.z = 0.5f;
+        node_marker.scale.x = 0.25f;
+        node_marker.scale.y = 0.25f;
+        node_marker.scale.z = 0.25f;
         node_marker.color.a = 1.0f;
         node_marker.color.r = 1.0f;
         node_marker.color.g = 1.0f;

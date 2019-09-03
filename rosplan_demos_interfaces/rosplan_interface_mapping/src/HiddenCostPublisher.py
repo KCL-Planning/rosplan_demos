@@ -10,7 +10,6 @@ def talker():
 
     if rospy.has_param('~peaks'):
         peaks = rospy.get_param('~peaks')
-    maxd = 100
     rate = rospy.Rate(0.05)
     while not rospy.is_shutdown():
         grid = OccupancyGrid()
@@ -28,13 +27,13 @@ def talker():
 
         for y in range(grid.info.height):
             for x in range(grid.info.width):
-                cost = 0
-                for (posx,posy) in peaks:
+                cost = 1
+                for (posx,posy,r) in peaks:
                     gridx = posx/grid.info.resolution
                     gridy = posy/grid.info.resolution
                     d = math.sqrt( float ( abs(gridx-x)*abs(gridx-x) + abs(gridy-y)*abs(gridy-y) ) )
-                    if d <= maxd:
-                        new_cost = 100.0 * (1 - float(d)/float(maxd))
+                    if d <= r:
+                        new_cost = 100.0 * (1 - float(d)/float(r))
                         if new_cost > cost:
                             cost = new_cost
                 grid.data.append(int(cost))

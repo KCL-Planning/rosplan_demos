@@ -238,9 +238,9 @@ namespace KCL_rosplan {
             node_marker.type = visualization_msgs::Marker::CUBE;
             node_marker.action = visualization_msgs::Marker::MODIFY;
             node_marker.pose = wit->pose;
-            node_marker.scale.x = 0.5f;
-            node_marker.scale.y = 0.5f;
-            node_marker.scale.z = 0.5f;
+            node_marker.scale.x = 0.35f;
+            node_marker.scale.y = 0.35f;
+            node_marker.scale.z = 0.35f;
             node_marker.color.a = 1.0f;
             node_marker.color.r = 1.0f;
             node_marker.color.g = 0.3f;

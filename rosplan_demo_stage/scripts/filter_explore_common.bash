@@ -1,4 +1,5 @@
 #!/bin/bash
+sleep 5
 
 rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 1000, min_distance: 1.2, casting_distance: 2.4, connecting_distance: 4.8, occupancy_threshold: 50, total_attempts: 100000}"
 
