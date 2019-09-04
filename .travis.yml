@@ -5,12 +5,11 @@ language: generic
 env:
   global:
     - ROS_DISTRO=kinetic
-    - UPSTREAM-WORKSPACE=file
-    - WRITABLE_SOURCE=true
+    - WRITABLE_SOURCE=true # allow the creation of files inside src
+    - NOT_TEST_INSTALL=true # skip install space unit tests
 
 before_install:
     - bash ./.travis/wait_for_apt.sh
-    - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
     - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
     - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
     - sudo apt-get update
@@ -22,6 +21,6 @@ before_install:
     - git submodule update --init --remote --recursive
 
 install:
-  - git clone --depth=1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+  - git clone --depth=1 --branch legacy-writable https://github.com/oscar-lima/industrial_ci.git .industrial_ci
 script:
   - .industrial_ci/travis.sh
