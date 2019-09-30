@@ -21,7 +21,7 @@ param="$param
   - {key: 'r', value: 'kenny'}
   - {key: 'wp', value: 'wp0'}
   function_value: 0.0";
-for i in $(seq 1 $(( $(rosservice call /rosplan_knowledge_base/state/instances "type_name: 'waypoint'" | sed 's/wp//g' | wc -l) - 2)) )
+for i in $(rosservice call /rosplan_knowledge_base/state/instances "type_name: 'waypoint'" | grep -ohP "wp\d+")
 do
 param_type="$param_type
 - 1"
