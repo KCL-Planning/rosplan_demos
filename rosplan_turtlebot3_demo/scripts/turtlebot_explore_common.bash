@@ -31,7 +31,7 @@ param="$param
   instance_name: ''
   attribute_name: 'visited'
   values:
-  - {key: 'wp', value: 'wp$i'}
+  - {key: 'wp', value: '$i'}
   function_value: 0.0"
 done;
 
