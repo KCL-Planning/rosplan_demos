@@ -44,10 +44,6 @@ include_directories(
 add_executable(rp_roadmap_server src/RPRoadmapServer.cpp)
 target_link_libraries(rp_roadmap_server ${catkin_LIBRARIES})
 
-# waypoint filter
-add_executable(rp_roadmap_filter src/RPRoadmapFilter.cpp)
-target_link_libraries(rp_roadmap_filter ${catkin_LIBRARIES})
-
 ##########
 ## Test ##
 ##########

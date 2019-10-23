@@ -52,7 +52,7 @@
     </include>
 
     <!-- waypoint filtering node (roadmap) -->
-    <node pkg="rosplan_interface_mapping" name="roadmap_filter" type="rp_roadmap_filter" output="screen">
+    <node pkg="rosplan_waypoint_sampling" name="roadmap_filter" type="rp_roadmap_filter" output="screen">
         <param name="srv_timeout"         value="6" />
         <param name="waypoint_count"      value="20" />
         <param name="wp_reference_frame"  value="map" />
@@ -63,7 +63,7 @@
     </node>
 
     <!-- hidden costmaps -->
-    <node pkg="rosplan_interface_mapping" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
+    <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
         <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_1.yaml" command="load" />
     </node>
 

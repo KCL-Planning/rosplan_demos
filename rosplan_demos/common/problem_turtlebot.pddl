@@ -5,6 +5,7 @@
     kenny - robot
 )
 (:init
+    (= (charge kenny) 0)
     (robot_at kenny wp0)
     (docked kenny)
     (dock_at wp0)
@@ -16,4 +17,5 @@
     (visited wp3)
     (visited wp4)
     (docked kenny)
+    (> (charge kenny) 0)
 )))
