@@ -64,9 +64,8 @@
 
     <!-- hidden costmaps -->
     <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
-        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_1.yaml" command="load" />
+        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_lt13.yaml" command="load" />
     </node>
-
 
     <!-- ROSPlan -->
     <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
