@@ -60,6 +60,12 @@
         <param name="wp_namespace_output" value="/filtered_waypoints" />
         <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
         <param name="costmap_topic"       value="/costmap" />
+
+        <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
+        <param name="minimum_sample_separation" value="1.6" />
+
+        <!-- Publish the modified probability distribution during sampling and slow things down a bit -->
+        <param name="animate_sampling" value="true" />
     </node>
 
     <!-- hidden costmaps -->
