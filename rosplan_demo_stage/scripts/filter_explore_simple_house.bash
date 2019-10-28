@@ -1,7 +1,7 @@
 #!/bin/bash
 sleep 5
 
-rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 1000, min_distance: 0.8, casting_distance: 1.6, connecting_distance: 2.0, occupancy_threshold: 50, total_attempts: 100000}"
+rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 1000, min_distance: 0.45, casting_distance: 1.0, connecting_distance: 0.8, occupancy_threshold: 50, total_attempts: 100000}"
 
 rosservice call /roadmap_filter/filter_waypoints
 
@@ -26,7 +26,7 @@ param="$param
   - {key: 'r', value: 'kenny'}
   - {key: 'wp', value: 'wp0'}
   function_value: 0.0";
-for i in $(rosservice call /rosplan_knowledge_base/state/instances "type_name: 'waypoint'" | grep -ohP "wp\d+")
+for i in $(seq 1 $(( $(rosservice call /rosplan_knowledge_base/state/instances "type_name: 'waypoint'" | sed 's/wp//g' | wc -l) - 2)) )
 do
 param_type="$param_type
 - 1"
@@ -36,7 +36,7 @@ param="$param
   instance_name: ''
   attribute_name: 'visited'
   values:
-  - {key: 'wp', value: '$i'}
+  - {key: 'wp', value: 'wp$i'}
   function_value: 0.0"
 done;
 

@@ -5,14 +5,14 @@
 
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
-    <arg name="map_file" default="$(find rosplan_demo_stage)/maps/lt13.yaml"/>
+    <arg name="map_file" default="$(find rosplan_demo_stage)/maps/simple_house.yaml"/>
     <arg name="common_param_file" default="$(find rosplan_demo_stage)/config/costmap_common_params_waffle.yaml"/>
     <arg name="local_param_file" default="$(find rosplan_demo_stage)/config/local_costmap_params.yaml"/>
     <arg name="global_param_file" default="$(find rosplan_demo_stage)/config/global_costmap_params.yaml"/>
-    <arg name="animate_sampling" default="false" />
+
 
     <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/lt13.world" respawn="false" output="screen">
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/simple_house.world" respawn="false" output="screen">
     </node>
 
     <!-- Map server -->
@@ -39,8 +39,8 @@
     <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
         <arg name="scan_topic" value="base_scan" />
         <!-- initial values match the stage world file -->
-        <arg name="initial_pose_x" value="13.900"/>
-        <arg name="initial_pose_y" value="36.000"/>
+        <arg name="initial_pose_x" value="6.525"/>
+        <arg name="initial_pose_y" value="5.375"/>
         <arg name="initial_pose_a" value="0.000"/>
     </include>
 
@@ -60,17 +60,11 @@
         <param name="wp_namespace_output" value="/filtered_waypoints" />
         <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
         <param name="costmap_topic"       value="/costmap" />
-
-        <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
-        <param name="minimum_sample_separation" value="1.6" />
-
-        <!-- Publish the modified probability distribution during sampling and slow things down a bit -->
-        <param name="animate_sampling" value="$(animate_sampling)" />
     </node>
 
     <!-- hidden costmaps -->
     <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
-        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_lt13.yaml" command="load" />
+        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_simple_house.yaml" command="load" />
     </node>
 
     <!-- ROSPlan -->

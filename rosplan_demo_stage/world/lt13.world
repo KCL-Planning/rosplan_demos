@@ -12,7 +12,7 @@ define floorplan model
   gui_outline 1
   gripper_return 0
   fiducial_return 0
-  ranger_return 1
+  ranger_return 1.000
 )
 
 floorplan
@@ -47,6 +47,6 @@ erratic( pose [ 0.000 10.275 0.000 0.000 ] name "era" color "blue")
 
 window
 (
-   size [826.000 1170.000]
+   size [1920 2031]
    show_data 1
 )
