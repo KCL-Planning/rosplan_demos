@@ -65,7 +65,7 @@
         <param name="minimum_sample_separation" value="1.6" />
 
         <!-- Publish the modified probability distribution during sampling and slow things down a bit -->
-        <param name="animate_sampling" value="$(animate_sampling)" />
+        <param name="animate_sampling" value="$(arg animate_sampling)" />
     </node>
 
     <!-- hidden costmaps -->
