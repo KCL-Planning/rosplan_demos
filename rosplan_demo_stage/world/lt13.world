@@ -47,6 +47,6 @@ erratic( pose [ 0.000 10.275 0.000 0.000 ] name "era" color "blue")
 
 window
 (
-   size [1920 2031]
+   size [960 1023]
    show_data 1
 )
