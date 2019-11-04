@@ -1,16 +1,17 @@
 # x, y, radius, std_dev
 doughnuts:
-- [4.17,38.8,1.3,0.30]
-- [4.57,38.8,1.3,0.30]
-- [4.97,38.8,1.3,0.30]
-- [4.01,30.6,1.3,0.30]
-- [2.37,22.8,1.3,0.30]
-- [3.94,12.8,1.3,0.30]
-- [23.6,13.4,1.3,0.30]
-- [23.8,18.3,1.3,0.30]
-- [23.9,23.4,1.3,0.30]
+- {name: '', x: 4.17, y: 38.8, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 4.57, y: 38.8, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 4.97, y: 38.8, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 4.01, y: 30.6, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 2.37, y: 22.8, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 3.94, y: 12.8, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 23.6, y: 13.4, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 23.8, y: 18.3, radius: 1.3, std_dev: 0.30}
+- {name: '', x: 23.9, y: 23.4, radius: 1.3, std_dev: 0.30}
 
 # Specify the arc of form [x, y, radius, angle, arclength (radians), std_dev]
-#bananas:
-#  - [22.3, 35.8, 0.75, 0, 1, 0.15]
-#  - [27.6, 32.3, 0.75, 1.57, 0.5, 0.15]
+bananas:
+  - {name: '', x: 22.3, y: 35.8, radius: 0.75, angle: 0,  arclen: 1, std_dev: 0.15}
+  - {name: '', x: 27.6, y: 32.3, radius: 0.75, angle: 1.57, arclen:  0.5, std_dev: 0.15}
+
