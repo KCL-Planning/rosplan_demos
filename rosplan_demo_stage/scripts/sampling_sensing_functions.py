@@ -94,20 +94,20 @@ def pedestal_visible_from(res, params):
             if rospy.has_param("/task_planning_waypoints/"+wp):
                 pose = rospy.get_param("/task_planning_waypoints/"+wp)
                 if len(pose) > 0:
-                    x = pose[0] - ped_req[0]
-                    y = pose[1] - ped_req[1]
+                    x = pose[0] - ped_req['x']
+                    y = pose[1] - ped_req['y']
                     d = sqrt(x**2 + y**2)
                     # the perfect distance from which to view is ped_req[2]
-                    d = abs(d - ped_req[2])
-                    if d < 2*ped_req[3] and not visible:
+                    d = abs(d - ped_req['radius'])
+                    if d < 2*ped_req['std_dev'] and not visible:
                         ret_value.append((wp + ':' + ped, True))
                         visible = True
-                    elif not d < 2*ped_req[3] and visible:
+                    elif not d < 2*ped_req['std_dev'] and visible:
                         ret_value.append((wp + ':' + ped, False))
                     # for debugging
                     if visible:
                         marker.points.append(Point(pose[0],pose[1],0))
-                        marker.points.append(Point(ped_req[0],ped_req[1],0))
+                        marker.points.append(Point(ped_req['x'],ped_req['y'],0))
                         markerArray.markers.append(marker)
 
     # Publish the MarkerArray
