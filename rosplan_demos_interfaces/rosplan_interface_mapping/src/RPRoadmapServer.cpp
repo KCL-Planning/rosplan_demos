@@ -367,7 +367,6 @@ namespace KCL_rosplan {
                     updateFuncSrv.request.update_type.push_back(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE);
                     updateFuncSrv.request.knowledge.push_back(item);
 
-                    uploadEdgeToParamServer(pairFrom.value, pairTo.value, dist); // source, sink, cost
 
                 }
             }
@@ -393,6 +392,24 @@ namespace KCL_rosplan {
             pose.pose.orientation.w = 1.0;
 
             uploadWPToParamServer(wit->first, pose); // waypoint id, pose
+
+	    //Sarah
+	    // Add edges to param server
+            for (std::vector<std::string>::iterator nit=wit->second->neighbours.begin(); nit!=wit->second->neighbours.end(); ++nit) {
+
+                    // calculate distance 
+		    double dist = sqrt(
+                            (wit->second->real_x - waypoints_[*nit]->real_x)*(wit->second->real_x - waypoints_[*nit]->real_x)
+                            + (wit->second->real_y - waypoints_[*nit]->real_y)*(wit->second->real_y - waypoints_[*nit]->real_y));
+                   
+                    // call param server	
+                    uploadEdgeToParamServer(wit->first,*nit, dist); // source, sink, cost
+
+                  }
+
+            
+
+
         }
 
         // publish waypoint graph as markers for visualisation purposes
@@ -405,8 +422,9 @@ namespace KCL_rosplan {
     //Sarah	
     bool RPRoadmapServer::uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist)
     {
-        ROS_INFO("Adding edge %s %s to ParamServer",wpSource, wpSink);
-        nh_.setParam(wp_namespace_ + "/" +"edge-" +wpSource + "-" + wpSink, dist);
+
+	std::string param_key = wp_namespace_ + "/" +"edge_" +wpSource + "_" + wpSink;
+        nh_.setParam(param_key, dist);
         return true;
     }	
 
