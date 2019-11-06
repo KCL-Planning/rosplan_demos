@@ -367,6 +367,8 @@ namespace KCL_rosplan {
                     updateFuncSrv.request.update_type.push_back(rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE);
                     updateFuncSrv.request.knowledge.push_back(item);
 
+                    uploadEdgeToParamServer(pairFrom.value, pairTo.value, dist); // source, sink, cost
+
                 }
             }
 
@@ -399,6 +401,14 @@ namespace KCL_rosplan {
         ROS_INFO("KCL: (%s) Done", ros::this_node::getName().c_str());
         return true;
     }
+    
+    //Sarah	
+    bool RPRoadmapServer::uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist)
+    {
+        ROS_INFO("Adding edge %s %s to ParamServer",wpSource, wpSink);
+        nh_.setParam(wp_namespace_ + "/" +"edge-" +wpSource + "-" + wpSink, dist);
+        return true;
+    }	
 
     void RPRoadmapServer::createPRM(nav_msgs::OccupancyGrid &map,
                 unsigned int nr_waypoints,

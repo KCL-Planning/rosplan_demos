@@ -175,6 +175,16 @@ namespace KCL_rosplan {
          * @param total_attempts maximum amount of attempts to generate random valid waypoints
          */
         void createPRM(nav_msgs::OccupancyGrid &map, unsigned int nr_waypoints, double min_distance, double casting_distance, double connecting_distance, double occupancy_threshold, int total_attempts);
+	
+        /**
+         * @brief uploading an edge to the param server (Sarah)
+         * @param source Waypoint         
+         * @param sink Waypoint
+         * @param distance between the source and sink 
+         * @return true if success, false otherwise
+         */
+	bool uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist);
+   
 
       private:
 
