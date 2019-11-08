@@ -393,23 +393,13 @@ namespace KCL_rosplan {
 
             uploadWPToParamServer(wit->first, pose); // waypoint id, pose
 
-	    //Sarah
-	    // Add edges to param server
+            // Add edges to param server
             for (std::vector<std::string>::iterator nit=wit->second->neighbours.begin(); nit!=wit->second->neighbours.end(); ++nit) {
-
-                    // calculate distance 
-		    double dist = sqrt(
-                            (wit->second->real_x - waypoints_[*nit]->real_x)*(wit->second->real_x - waypoints_[*nit]->real_x)
-                            + (wit->second->real_y - waypoints_[*nit]->real_y)*(wit->second->real_y - waypoints_[*nit]->real_y));
-                   
-                    // call param server	
-                    uploadEdgeToParamServer(wit->first,*nit, dist); // source, sink, cost
-
-                  }
-
-            
-
-
+                double dist = sqrt(
+                    (wit->second->real_x - waypoints_[*nit]->real_x)*(wit->second->real_x - waypoints_[*nit]->real_x)
+                    + (wit->second->real_y - waypoints_[*nit]->real_y)*(wit->second->real_y - waypoints_[*nit]->real_y));
+                uploadEdgeToParamServer(wit->first,*nit, dist); // source, sink, cost
+            }
         }
 
         // publish waypoint graph as markers for visualisation purposes
@@ -420,10 +410,9 @@ namespace KCL_rosplan {
     }
     
     //Sarah	
-    bool RPRoadmapServer::uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist)
+    bool RPRoadmapServer::uploadEdgeToParamServer(std::string &wpSource, std::string &wpSink, double dist)
     {
-
-	std::string param_key = wp_namespace_ + "/" +"edge/" +wpSource + "/" + wpSink;
+        std::string param_key = wp_namespace_ + "/" +"edge/" +wpSource + "/" + wpSink;
         nh_.setParam(param_key, dist);
         return true;
     }	
