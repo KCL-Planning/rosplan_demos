@@ -1,5 +1,5 @@
 #!/bin/bash
-rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 1000, min_distance: 0.8, casting_distance: 1.6, connecting_distance: 2.0, occupancy_threshold: 50, total_attempts: 100000}"
+rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 1000, min_distance: 0.8, casting_distance: 1.6, connecting_distance: 2.0, occupancy_threshold: 50, total_attempts: 200000}"
 
 rosservice call /waypoint_sampler/sample_waypoints
 

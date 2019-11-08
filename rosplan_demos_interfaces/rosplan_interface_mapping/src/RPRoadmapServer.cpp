@@ -481,16 +481,10 @@ namespace KCL_rosplan {
         while(waypoints_.size() < nr_waypoints && ++loop_counter < total_attempts) {
 
             // Sample a random waypoint, if possible with fewer than 6 neighbours.
-            std::map<std::string, Waypoint*>::iterator item;
-            Waypoint* casting_wp;
-            int sample_counter = 0;
-            do {
-                item = waypoints_.begin();
-                std::advance(item, rand() % waypoints_.size());
-                casting_wp = (*item).second;
-                ++sample_counter;
-            } while (casting_wp->neighbours.size() >= 4 && sample_counter < waypoints_.size());
-std::cout << sample_counter << std::endl;
+            std::map<std::string, Waypoint*>::iterator item = waypoints_.begin();
+            std::advance(item, rand() % waypoints_.size());
+            Waypoint* casting_wp = (*item).second;
+
             // sample collision-free configuration at random
             int x = rand() % width;
             int y = rand() % height;
