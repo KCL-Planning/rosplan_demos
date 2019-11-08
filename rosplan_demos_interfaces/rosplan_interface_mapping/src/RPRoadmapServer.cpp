@@ -409,8 +409,7 @@ namespace KCL_rosplan {
         return true;
     }
     
-    //Sarah	
-    bool RPRoadmapServer::uploadEdgeToParamServer(std::string &wpSource, std::string &wpSink, double dist)
+    bool RPRoadmapServer::uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist)
     {
         std::string param_key = wp_namespace_ + "/" +"edge/" +wpSource + "/" + wpSink;
         nh_.setParam(param_key, dist);
