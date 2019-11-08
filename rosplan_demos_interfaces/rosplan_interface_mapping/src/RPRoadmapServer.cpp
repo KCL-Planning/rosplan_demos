@@ -423,7 +423,7 @@ namespace KCL_rosplan {
     bool RPRoadmapServer::uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist)
     {
 
-	std::string param_key = wp_namespace_ + "/" +"edge_" +wpSource + "_" + wpSink;
+	std::string param_key = wp_namespace_ + "/" +"edge/" +wpSource + "/" + wpSink;
         nh_.setParam(param_key, dist);
         return true;
     }	
@@ -460,7 +460,7 @@ namespace KCL_rosplan {
         start_pose.pose.position = base_odom_.pose.position;
         start_pose.pose.orientation = base_odom_.pose.orientation;
         try {
-            tf_.waitForTransform( base_odom_.header.frame_id, "map", ros::Time::now(), ros::Duration(500) );
+            tf_.waitForTransform( base_odom_.header.frame_id, "map", ros::Time::now(), ros::Duration(100) );
             tf_.transformPose("map", start_pose, start_pose_transformed);
         } catch(tf::LookupException& ex) {
             ROS_ERROR("KCL: (%s) Lookup Error: %s", ros::this_node::getName().c_str(), ex.what());
@@ -750,7 +750,7 @@ std::cout << sample_counter << std::endl;
         pose_as_array.push_back(waypoint.pose.position.x);
         pose_as_array.push_back(waypoint.pose.position.y);
         pose_as_array.push_back(yaw);
-        nh_.setParam(wp_namespace_ + "/" + wp_id, pose_as_array);
+        nh_.setParam(wp_namespace_ + "/wp/" + wp_id, pose_as_array);
     }
 
 
