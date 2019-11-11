@@ -9,7 +9,7 @@
     <arg name="common_param_file" default="$(find rosplan_demo_stage)/config/costmap_common_params_waffle.yaml"/>
     <arg name="local_param_file" default="$(find rosplan_demo_stage)/config/local_costmap_params.yaml"/>
     <arg name="global_param_file" default="$(find rosplan_demo_stage)/config/global_costmap_params.yaml"/>
-    <arg name="objects_file" default="$(find rosplan_demo_stage)/config/hidden_costmap_lt13.yaml" />
+    <arg name="objects_file" default="$(find hidden_costs_generator)/object_config/simple_house_12doughnuts_variant04.yaml" />
     <arg name="animate_sampling" default="false" />
 
 
