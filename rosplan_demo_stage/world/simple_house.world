@@ -22,42 +22,6 @@ floorplan
    size [13.050 10.750 1.000]
 )
 
-define box model
-(
-    size [ 0.150 0.150 0.500 ]
-    origin [ 0.000 0.000 0.000 0.000 ]
-
-    update_interval 100
-    color "green"
-
-    # determine how the model appears in various sensors
-    fiducial_return 2
-    fiducial_key 2
-    obstacle_return 0
-    ranger_return 1.0
-    blob_return 1
-    ranger_return 1.000
-    gripper_return 1
-
-    # GUI properties
-    gui_nose 0
-    gui_grid 0
-    gui_outline 1
-    gui_move 1
-
-    boundary 0
-    mass 10.0
-    map_resolution 0.1
-    say ""
-    alwayson 0
-
-    stack_children 1
-)
-
-box(pose [ 2.438 -4.834 0.000 0.000 ])
-box(pose [ 4.175 -4.885 0.000 0.000 ])
-box(pose [ 3.185 -4.105 0.000 0.000 ])
-
 define topurg ranger
 (
   sensor( 			
@@ -69,17 +33,6 @@ define topurg ranger
   size [ 0.050 0.050 0.100 ]
 )
 
-define frontgrip gripper
-(
-  # gripper properties
-  paddle_size [ 0.66 0.10 0.40 ]
-  paddle_state [ "open" "down" ]
-  autosnatch 1
-
-  # model properties
-  size [ 0.25 0.30 0.25 ]
-)
-
 define erratic position
 (
   size [0.250 0.250 0.250]
@@ -87,7 +40,6 @@ define erratic position
   gui_nose 1
   drive "diff"
   topurg(pose [ 0.050 0.000 0.000 0.000 ])
-  frontgrip(pose [ 0.250 0.000 0.000 0.000 ])
 )
 
 # throw in a robot
@@ -95,6 +47,6 @@ erratic( pose [ 0.000 0.000 0.000 0.000 ] name "era" color "red")
 
 window
 (
-   size [1920 2031]
+   size [960 1025]
    show_data 1
 )
