@@ -446,6 +446,7 @@ namespace KCL_rosplan {
         while (not odom_received_) {
             ros::spinOnce();
             r.sleep();
+            std::cout << "GERERAD" << std::endl;
         }
 
         // create robot start point
@@ -617,84 +618,89 @@ namespace KCL_rosplan {
             }
         }
 
-        // instance
-        rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
-        updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-        updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
-        updateSrv.request.knowledge.instance_type = "waypoint";
-        updateSrv.request.knowledge.instance_name = new_wp->wpID;
-        uploadWPToParamServer(new_wp->wpID, waypoint); // waypoint id, pose
+        if(update_waypoints_) {
 
-        // wait for service existence
-        if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
-            ROS_ERROR("KCL: (%s) Update KB service not found (%s)", ros::this_node::getName().c_str(), update_kb_client_.getService().c_str());
-            return false;
+            // instance
+            rosplan_knowledge_msgs::KnowledgeUpdateService updateSrv;
+            updateSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+            updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
+            updateSrv.request.knowledge.instance_type = "waypoint";
+            updateSrv.request.knowledge.instance_name = new_wp->wpID;
+
+            // wait for service existence
+            if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
+                ROS_ERROR("KCL: (%s) Update KB service not found (%s)", ros::this_node::getName().c_str(), update_kb_client_.getService().c_str());
+                return false;
+            }
+
+            if (!update_kb_client_.call(updateSrv)) {
+                ROS_ERROR("KCL: (%s) Failed to add a new waypoint instance.", ros::this_node::getName().c_str());
+                return false;
+            }
         }
 
-        if (!update_kb_client_.call(updateSrv)) {
-            ROS_ERROR("KCL: (%s) Failed to add a new waypoint instance.", ros::this_node::getName().c_str());
-            return false;
-        }
+        if(update_waypoints_ && update_connectivity_) {
 
-        ROS_INFO("KCL: (%s) Process the %lu neighbours of this new waypoint.", ros::this_node::getName().c_str(), new_wp->neighbours.size());
+            ROS_INFO("KCL: (%s) Process the %lu neighbours of this new waypoint.", ros::this_node::getName().c_str(), new_wp->neighbours.size());
 
-        // predicates
-        for (std::vector<std::string>::iterator nit=new_wp->neighbours.begin(); nit!=new_wp->neighbours.end(); ++nit) {
-            // connected new->old
-            rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
-            updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-            updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
-            updatePredSrv.request.knowledge.attribute_name = "connected";
-            diagnostic_msgs::KeyValue pairFrom;
-            pairFrom.key = "from";
-            pairFrom.value = new_wp->wpID;
-            updatePredSrv.request.knowledge.values.push_back(pairFrom);
-            diagnostic_msgs::KeyValue pairTo;
-            pairTo.key = "to";
-            pairTo.value = *nit;
-            updatePredSrv.request.knowledge.values.push_back(pairTo);
-            update_kb_client_.call(updatePredSrv);
+            // predicates
+            for (std::vector<std::string>::iterator nit=new_wp->neighbours.begin(); nit!=new_wp->neighbours.end(); ++nit) {
+                // connected new->old
+                rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
+                updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+                updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+                updatePredSrv.request.knowledge.attribute_name = "connected";
+                diagnostic_msgs::KeyValue pairFrom;
+                pairFrom.key = "from";
+                pairFrom.value = new_wp->wpID;
+                updatePredSrv.request.knowledge.values.push_back(pairFrom);
+                diagnostic_msgs::KeyValue pairTo;
+                pairTo.key = "to";
+                pairTo.value = *nit;
+                updatePredSrv.request.knowledge.values.push_back(pairTo);
+                update_kb_client_.call(updatePredSrv);
 
-            // connected old->new
-            updatePredSrv.request.knowledge.values.clear();
-            pairFrom.value = *nit;
-            updatePredSrv.request.knowledge.values.push_back(pairFrom);
-            pairTo.value = new_wp->wpID;
-            updatePredSrv.request.knowledge.values.push_back(pairTo);
-            update_kb_client_.call(updatePredSrv);
-        }
+                // connected old->new
+                updatePredSrv.request.knowledge.values.clear();
+                pairFrom.value = *nit;
+                updatePredSrv.request.knowledge.values.push_back(pairFrom);
+                pairTo.value = new_wp->wpID;
+                updatePredSrv.request.knowledge.values.push_back(pairTo);
+                update_kb_client_.call(updatePredSrv);
+            }
 
-        // functions
-        for (std::vector<std::string>::iterator nit=new_wp->neighbours.begin(); nit!=new_wp->neighbours.end(); ++nit) {
+            // functions
+            for (std::vector<std::string>::iterator nit=new_wp->neighbours.begin(); nit!=new_wp->neighbours.end(); ++nit) {
 
-            // distance new->old
-            rosplan_knowledge_msgs::KnowledgeUpdateService updateFuncSrv;
-            updateFuncSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-            updateFuncSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FUNCTION;
-            updateFuncSrv.request.knowledge.attribute_name = "distance";
-            diagnostic_msgs::KeyValue pairFrom;
-            pairFrom.key = "wp1";
-            pairFrom.value = new_wp->wpID;
-            updateFuncSrv.request.knowledge.values.push_back(pairFrom);
-            diagnostic_msgs::KeyValue pairTo;
-            pairTo.key = "wp2";
-            pairTo.value = *nit;
-            updateFuncSrv.request.knowledge.values.push_back(pairTo);
-            double dist = sqrt(
-                    (new_wp->real_x - waypoints_[*nit]->real_x)*(new_wp->real_x - waypoints_[*nit]->real_x)
-                    + (new_wp->real_y - waypoints_[*nit]->real_y)*(new_wp->real_y - waypoints_[*nit]->real_y));
-            updateFuncSrv.request.knowledge.function_value = dist;
-            update_kb_client_.call(updateFuncSrv);
-            uploadEdgeToParamServer(id,*nit, dist); // source, sink, cost
+                // distance new->old
+                rosplan_knowledge_msgs::KnowledgeUpdateService updateFuncSrv;
+                updateFuncSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+                updateFuncSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FUNCTION;
+                updateFuncSrv.request.knowledge.attribute_name = "distance";
+                diagnostic_msgs::KeyValue pairFrom;
+                pairFrom.key = "wp1";
+                pairFrom.value = new_wp->wpID;
+                updateFuncSrv.request.knowledge.values.push_back(pairFrom);
+                diagnostic_msgs::KeyValue pairTo;
+                pairTo.key = "wp2";
+                pairTo.value = *nit;
+                updateFuncSrv.request.knowledge.values.push_back(pairTo);
+                double dist = sqrt(
+                        (new_wp->real_x - waypoints_[*nit]->real_x)*(new_wp->real_x - waypoints_[*nit]->real_x)
+                        + (new_wp->real_y - waypoints_[*nit]->real_y)*(new_wp->real_y - waypoints_[*nit]->real_y));
+                updateFuncSrv.request.knowledge.function_value = dist;
+                update_kb_client_.call(updateFuncSrv);
+                uploadEdgeToParamServer(id,*nit, dist); // source, sink, cost
 
-            // distance old->new
-            updateFuncSrv.request.knowledge.values.clear();
-            pairFrom.value = *nit;
-            updateFuncSrv.request.knowledge.values.push_back(pairFrom);
-            pairTo.value = new_wp->wpID;
-            updateFuncSrv.request.knowledge.values.push_back(pairTo);
-            updateFuncSrv.request.knowledge.function_value = dist;
-            update_kb_client_.call(updateFuncSrv);
+                // distance old->new
+                updateFuncSrv.request.knowledge.values.clear();
+                pairFrom.value = *nit;
+                updateFuncSrv.request.knowledge.values.push_back(pairFrom);
+                pairTo.value = new_wp->wpID;
+                updateFuncSrv.request.knowledge.values.push_back(pairTo);
+                updateFuncSrv.request.knowledge.function_value = dist;
+                update_kb_client_.call(updateFuncSrv);
+            }
         }
 
         // upload waypoint to param server

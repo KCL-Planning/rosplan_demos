@@ -6,7 +6,7 @@ import time
 import os
 
 from std_srvs.srv import Empty, EmptyResponse
-from rosplan_knowledge_msgs.srv import SetInt, GetAttributeService, KnowledgeUpdateService, KnowledgeUpdateServiceRequest
+from rosplan_knowledge_msgs.srv import *
 from rosplan_interface_mapping.srv import CreatePRM
 from rosplan_dispatch_msgs.srv import DispatchService, DispatchServiceResponse, PlanningService, PlanningServiceResponse
 from diagnostic_msgs.msg import KeyValue
@@ -70,6 +70,12 @@ try:
                 propcount = len(vis_response.attributes)
                 rospy.sleep(0.5)
 
+            wp_id = "GERARDDDD!!"
+            inst = rospy.ServiceProxy('/rosplan_knowledge_base/state/instances', GetInstanceService)
+            inst_response = inst("waypoint")
+            if len(inst_response.instances):
+                wp_id = inst_response.instances[0]
+
             kus = KnowledgeUpdateServiceRequest()
             kus.knowledge.knowledge_type = 1
             kus.knowledge.attribute_name = 'robot_at'
@@ -79,7 +85,7 @@ try:
             kus.knowledge.values.append(kv)
             kv = KeyValue()
             kv.key = 'wp'
-            kv.value = 'wp0'
+            kv.value = wp_id
             kus.knowledge.values.append(kv)
             kuc = rospy.ServiceProxy('/rosplan_knowledge_base/update', KnowledgeUpdateService)        
             if not kuc(kus):

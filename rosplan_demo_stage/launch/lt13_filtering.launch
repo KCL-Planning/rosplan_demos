@@ -8,8 +8,8 @@
     <arg name="max_sample_size"  default="10" />
     <arg name="max_prm_size"     default="1000" />
     <arg name="rviz"             default="true" />
-    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_12doughnuts_variant04.yaml" />
-    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_12doughnuts_variant04.yaml.pddl" />
+    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_50doughnuts_variant04.yaml" />
+    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_50doughnuts_variant04.yaml.pddl" />
 
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
@@ -22,7 +22,6 @@
     <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
     <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/simple_house.world" respawn="false" output="log">
     </node>
-
 
     <!-- Map server -->
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
