@@ -4,6 +4,7 @@
     kenny - robot
 )
 (:init
+    (robot_at kenny wp0)
 )
 (:goal (and
 ))

@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /localisation1/LaserScan1
+        - /Maps1/Map1
       Splitter Ratio: 0.5055555701255798
     Tree Height: 724
   - Class: rviz/Selection
@@ -25,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -43,65 +44,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        base_scan:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_depth_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_rgb_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_rgb_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        caster_back_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        caster_back_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        imu_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        wheel_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -156,7 +98,7 @@ Visualization Manager:
           Topic: /particlecloud
           Unreliable: false
           Value: true
-      Enabled: true
+      Enabled: false
       Name: localisation
     - Class: rviz/Group
       Displays:
@@ -278,13 +220,13 @@ Visualization Manager:
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
-          Enabled: false
+          Enabled: true
           Marker Topic: /rosplan_roadmap_server/viz/edges
           Name: Edges
           Namespaces:
-            {}
+            /rosplan_demo_waypoints: true
           Queue Size: 100
-          Value: false
+          Value: true
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /waypoint_sampler/viz/waypoints
@@ -303,7 +245,7 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /pedestal_visible_from
+          Marker Topic: /doughnut_visible_from
           Name: PedestalVisibility
           Namespaces:
             "": true
@@ -392,11 +334,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 26.167665481567383
+      Scale: 61.86355972290039
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 15.492912292480469
-      Y: 25.594745635986328
+      X: 7.151993274688721
+      Y: 4.916505336761475
     Saved: ~
 Window Geometry:
   Displays:

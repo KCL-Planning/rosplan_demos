@@ -5,19 +5,22 @@
 (:types
 	waypoint 
 	robot
-    exhibit
-    painting pedestal - exhibit
+    doughnut
+    order
 )
 
 (:predicates
 	(robot_at ?v - robot ?wp - waypoint)
 	(visited ?wp - waypoint)
-	(inspected ?e - exhibit)
-    (pedestal_visible_from ?from - waypoint ?e - pedestal)
+	(inspected ?e - doughnut)
+	(not_inspected ?e - doughnut)
+    (doughnut_visible_from ?from - waypoint ?e - doughnut)
+    (part_of  ?e - doughnut ?o - order)
 )
 
 (:functions
     (distance ?a ?b - waypoint)
+    (order_complete ?o - order)
 )
 
 ;; Move between any two waypoints, avoiding terrain
@@ -32,18 +35,20 @@
 		(at end (robot_at ?v ?to)))
 )
 
-;; inspect a pedestal
-(:durative-action inspect_pedestal
-	:parameters (?v - robot ?from - waypoint ?p - pedestal)
+;; inspect a doughnut
+(:durative-action inspect_doughnut
+	:parameters (?v - robot ?from - waypoint ?p - doughnut ?o - order)
 	:duration ( = ?duration 5)
 	:condition (and
-		(at start (pedestal_visible_from ?from ?p))
+		(at start (doughnut_visible_from ?from ?p))
+    	(at start (not_inspected ?p))
+        (at start (part_of ?p ?o))
 		(over all (robot_at ?v ?from))
         )
 	:effect (and
+    	(at start (not (not_inspected ?p)))
 		(at end (inspected ?p))
+		(at end (increase (order_complete ?o) 1))
         )
 )
-
-
 )
