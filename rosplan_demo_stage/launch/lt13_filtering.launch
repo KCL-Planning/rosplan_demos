@@ -22,6 +22,7 @@
     <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/simple_house.world" respawn="false" output="log">
     </node>
 
+
     <!-- Map server -->
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
@@ -38,6 +39,9 @@
         <arg name="use_static_map" value="true" />
         <arg name="update_waypoints" value="$(eval arg('approach')==1)" />
         <arg name="update_connectivity" value="$(eval arg('approach')==1)" />
+        <arg name="wp_reference_frame"  value="/map" />
+        <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+        <arg name="costmap_topic"       value="/costmap" />
     </include>
 
     <!-- ROSPlan -->
@@ -82,6 +86,26 @@
             <rosparam file="$(arg objects_file)" command="load" />
         </node>
     </group>
+
+
+    <!-- fixed waypoint generation node (1 per object) (roadmap) -->
+    <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_fixed_wp_gen" output="screen" if="$(eval arg('approach')==2)">
+        <param name="srv_timeout"         value="6" />
+        <param name="waypoint_count"      value="20" />
+        <param name="wp_reference_frame"  value="map" />
+        <param name="wp_namespace_input"  value="/rosplan_demo_waypoints" />
+        <param name="wp_namespace_output" value="/task_planning_waypoints" />
+        <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+        <param name="costmap_topic"       value="/costmap" />
+
+        <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
+        <param name="minimum_sample_separation" value="1.6" />
+
+        <!-- Publish the modified probability distribution during sampling and slow things down a bit -->
+        <param name="animate_sampling" value="$(arg animate_sampling)" />
+        <rosparam file="$(arg objects_file)" command="load" />
+    </node>
+
 
     <group if="$(arg rviz)">
         <!-- visualisation of robot sensor data -->

@@ -111,7 +111,7 @@ namespace KCL_rosplan {
 
         // check if wps are available in param server, if so, load them in symbolic KB and visualise them
         loadParams();
-
+        odom_received_ = false;
         ROS_INFO("KCL: (%s) Ready to receive.", ros::this_node::getName().c_str());
     }
 
@@ -127,6 +127,7 @@ namespace KCL_rosplan {
         base_odom_.header = msg->header;
         base_odom_.pose.position = msg->pose.pose.position;
         base_odom_.pose.orientation = msg->pose.pose.orientation;
+        odom_received_ = true;
     }
 
     /*------------------------------*/
@@ -440,6 +441,12 @@ namespace KCL_rosplan {
         }
         waypoints_.clear();
         edges_.clear();
+
+        ros::Rate r(10);
+        while (not odom_received_) {
+            ros::spinOnce();
+            r.sleep();
+        }
 
         // create robot start point
         geometry_msgs::PoseStamped start_pose;
