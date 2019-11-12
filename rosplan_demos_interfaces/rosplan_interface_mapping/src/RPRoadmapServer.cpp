@@ -616,6 +616,7 @@ namespace KCL_rosplan {
         updateSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::INSTANCE;
         updateSrv.request.knowledge.instance_type = "waypoint";
         updateSrv.request.knowledge.instance_name = new_wp->wpID;
+        uploadWPToParamServer(new_wp->wpID, waypoint); // waypoint id, pose
 
         // wait for service existence
         if(!update_kb_client_.waitForExistence(ros::Duration(srv_timeout_))) {
@@ -677,6 +678,7 @@ namespace KCL_rosplan {
                     + (new_wp->real_y - waypoints_[*nit]->real_y)*(new_wp->real_y - waypoints_[*nit]->real_y));
             updateFuncSrv.request.knowledge.function_value = dist;
             update_kb_client_.call(updateFuncSrv);
+            uploadEdgeToParamServer(id,*nit, dist); // source, sink, cost
 
             // distance old->new
             updateFuncSrv.request.knowledge.values.clear();
