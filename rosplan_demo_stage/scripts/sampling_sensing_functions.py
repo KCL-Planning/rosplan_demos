@@ -162,7 +162,13 @@ def doughnut_visible_from(res, params):
 
             # fetch the doughnut requirements
             if rospy.has_param("/task_planning_waypoints/"+wp):
-                pose = rospy.get_param("/task_planning_waypoints/"+wp)
+
+                pose = []
+                try:
+                    pose = rospy.get_param("/task_planning_waypoints/"+wp)
+                except KeyError, e:
+                    return ret_value
+
                 if len(pose) > 0:
 
                     (xA, yA) = (pose[0], pose[1])

@@ -15,5 +15,5 @@ services:
             - '*'
         service: /rosplan_knowledge_base/state/instances
         srv_type: rosplan_knowledge_msgs/GetInstanceService
-        time_between_calls: 2
+        time_between_calls: 0.5
         request: GetInstanceServiceRequest(type_name="waypoint")
