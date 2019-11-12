@@ -6,14 +6,14 @@
 	waypoint 
 	robot
     exhibit
-    painting pedestal - exhibit
+    painting doughnut - exhibit
 )
 
 (:predicates
 	(robot_at ?v - robot ?wp - waypoint)
 	(visited ?wp - waypoint)
 	(inspected ?e - exhibit)
-    (pedestal_visible_from ?from - waypoint ?e - pedestal)
+    (doughnut_visible_from ?from - waypoint ?e - doughnut)
 )
 
 (:functions
@@ -32,12 +32,12 @@
 		(at end (robot_at ?v ?to)))
 )
 
-;; inspect a pedestal
-(:durative-action inspect_pedestal
-	:parameters (?v - robot ?from - waypoint ?p - pedestal)
+;; inspect a doughnut
+(:durative-action inspect_doughnut
+	:parameters (?v - robot ?from - waypoint ?p - doughnut)
 	:duration ( = ?duration 5)
 	:condition (and
-		(at start (pedestal_visible_from ?from ?p))
+		(at start (doughnut_visible_from ?from ?p))
 		(over all (robot_at ?v ?from))
         )
 	:effect (and

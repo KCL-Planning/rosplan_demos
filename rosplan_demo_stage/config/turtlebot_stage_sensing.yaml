@@ -1,15 +1,15 @@
 functions:
     - $(find rosplan_demo_stage)/scripts/sampling_sensing_functions.py
-topics:
-    robot_at:
-        params:
-            - kenny
-            - '*'
-        topic: /amcl_pose
-        msg_type: geometry_msgs/PoseWithCovarianceStamped
+#topics:
+#    robot_at:
+#        params:
+#            - kenny
+#            - '*'
+#        topic: /amcl_pose
+#        msg_type: geometry_msgs/PoseWithCovarianceStamped
 
 services:
-    pedestal_visible_from:
+    doughnut_visible_from:
         params:
             - '*'
             - '*'

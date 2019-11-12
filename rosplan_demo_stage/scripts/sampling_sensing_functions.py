@@ -24,6 +24,7 @@ def robot_at(msg, params): # Idea: Params are the instances of all the parameter
     for a in attributes:
         if not a.is_negative:
             curr_wp = a.values[1].value
+            rospy.loginfo("KCL: (%s) Robot is at $s" % rospy.get_name(), curr_wp)
             break
 
     for robot in params[0]:
@@ -46,7 +47,7 @@ def robot_at(msg, params): # Idea: Params are the instances of all the parameter
     return ret_value
 
 #################################
-# SETTING pedestal_visible_from #
+# SETTING doughnut_visible_from #
 #################################
 
 _static_map = None
@@ -57,7 +58,7 @@ def set_map(msg):
     rospy.loginfo("KCL: (%s) Static map received!" % rospy.get_name())
     _static_map = msg
 
-def pedestal_visible_from(res, params):
+def doughnut_visible_from(res, params):
 
     global _static_map
 
@@ -124,9 +125,9 @@ def pedestal_visible_from(res, params):
     if skip_check:
         return ret_value
 
-    attributes = get_kb_attribute("pedestal_visible_from")
+    attributes = get_kb_attribute("doughnut_visible_from")
 
-    topic = 'pedestal_visible_from'
+    topic = 'doughnut_visible_from'
     publisher = rospy.Publisher(topic, MarkerArray, queue_size=1)
     markerArray = MarkerArray() 
 
@@ -144,7 +145,7 @@ def pedestal_visible_from(res, params):
     marker.color.g = 1.0;
     marker.color.b = 0.0;
 
-    # check for each pedestal
+    # check for each doughnut
     count = 0
     for ped in params[1]:
 
@@ -159,7 +160,7 @@ def pedestal_visible_from(res, params):
                 if not a.is_negative and wp == a.values[0].value and ped == a.values[1].value:
                     visible = True
 
-            # fetch the pedestal requirements
+            # fetch the doughnut requirements
             if rospy.has_param("/task_planning_waypoints/"+wp):
                 pose = rospy.get_param("/task_planning_waypoints/"+wp)
                 if len(pose) > 0:
