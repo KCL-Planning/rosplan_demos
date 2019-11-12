@@ -73,7 +73,7 @@ namespace KCL_rosplan {
         std::string get_map_srv_name;
 
         // get required parameters from param server
-        nh_.param("use_static_map_", use_static_map_, false);
+        nh_.param("use_static_map", use_static_map_, false);
         nh_.param("update_connectivity", update_connectivity_, true);
         nh_.param("update_waypoints", update_waypoints_, true);
         nh_.param<std::string>("wp_reference_frame", wp_reference_frame_, "map");
