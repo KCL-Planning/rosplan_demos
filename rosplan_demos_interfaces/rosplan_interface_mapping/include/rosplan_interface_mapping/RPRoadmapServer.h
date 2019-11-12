@@ -240,6 +240,8 @@ namespace KCL_rosplan {
         /// to store the namespace in which the waypoints are stored in the parameter server
         std::string wp_namespace_;
 
+        // to know when odom is received
+        bool odom_received_;
     };
 }
 #endif
