@@ -138,6 +138,15 @@ def plan_cost():
     finally:
         f.close()
 
+def plan_failed():
+    try:
+        f = open(results_path, "a")
+        f.write(str(approach)+","+os.path.basename(initial_state)+",-1,-1,-1\n")
+    except:
+        rospy.logerr("KCL: (%s) Error writing to results file." % rospy.get_name())     
+    finally:
+        f.close()
+
 ### EXPERIMENT ###
 try:
     rospy.sleep(1)
@@ -163,6 +172,8 @@ try:
                     rospy.sleep(0.5)
                 plan_cost()
                 break
+        if not plan_found:
+            plan_failed()
 
     ### SAMPLING APPROACH ###
     if approach == 0 or approach == 2:
@@ -196,6 +207,8 @@ try:
                     rospy.sleep(0.5)
                 plan_cost()
                 break
+        if not plan_found:
+            plan_failed()
 
 except rospy.ServiceException, e:
     rospy.logerr("KCL: (%s) Service call failed: %s" % (rospy.get_name(), e))
