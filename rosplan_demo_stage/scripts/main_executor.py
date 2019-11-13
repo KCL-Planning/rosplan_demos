@@ -128,7 +128,7 @@ def plan_cost():
     total_distance = 0
     for a in action_list:
         if a.find("goto_waypoint"):
-            ta = action_list[len(action_list)-1].split("[")[1].split("]")[0]
+            ta = a.split("[")[1].split("]")[0]
             total_distance += float(ta)
     try:
         f = open(results_path, "a")
