@@ -10,42 +10,6 @@ from visualization_msgs.msg import MarkerArray
 from nav_msgs.msg import OccupancyGrid
 from math import sqrt
 
-####################
-# SETTING robot_at #
-####################
-
-def robot_at(msg, params): # Idea: Params are the instances of all the parameters in a dictionary and the messaestoreproxy
-    assert(msg.header.frame_id == "map")
-    assert(len(params) == 2)
-    ret_value = []
-    attributes = get_kb_attribute("robot_at")
-    curr_wp = ''
-    # Find current robot_location
-    for a in attributes:
-        if not a.is_negative:
-            curr_wp = a.values[1].value
-            rospy.loginfo("KCL: (%s) Robot is at $s" % rospy.get_name(), curr_wp)
-            break
-
-    for robot in params[0]:
-        distance = float('inf')
-        closest_wp = ''
-        for wp in params[1]:
-            if rospy.has_param("/task_planning_waypoints/"+wp):
-                pose = rospy.get_param("/task_planning_waypoints/"+wp)
-                if len(pose) > 0:
-                    x = pose[0] - msg.pose.pose.position.x
-                    y = pose[1] - msg.pose.pose.position.y
-                    d = sqrt(x**2 + y**2)
-                    if d < distance:
-                        closest_wp = wp
-                        distance = d
-        if curr_wp != closest_wp:
-            if curr_wp != '':
-                ret_value.append((robot + ':' + curr_wp, False)) # Set current waypoint to false
-            ret_value.append((robot + ':' + closest_wp, True))  # Set new wp to true
-    return ret_value
-
 #################################
 # SETTING doughnut_visible_from #
 #################################
@@ -58,7 +22,7 @@ def set_map(msg):
     rospy.loginfo("KCL: (%s) Static map received!" % rospy.get_name())
     _static_map = msg
 
-def doughnut_visible_from(res, params):
+def doughnut_visible_from(msg, params):
 
     global _static_map
 

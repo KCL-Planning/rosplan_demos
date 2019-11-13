@@ -13,6 +13,10 @@ from rosplan_interface_mapping.srv import CreatePRM
 from rosplan_dispatch_msgs.srv import DispatchService, DispatchServiceResponse, PlanningService, PlanningServiceResponse
 from diagnostic_msgs.msg import KeyValue
 
+############
+# THE REST #
+############
+
 # get path of pkg
 rospack = rospkg.RosPack()
 rospy.init_node("coordinator")
@@ -37,6 +41,8 @@ rospy.wait_for_service('/rosplan_knowledge_base/state/propositions')
 if approach == 0:
     rospy.wait_for_service('/waypoint_sampler/sample_waypoints')
 
+vispub = rospy.Publisher('/update_visibility', String, queue_size=10)
+
 plan = ""
 plan_recieved = False
 planning_time = 0
@@ -55,6 +61,11 @@ def make_prm(size):
         rospy.logerr("KCL: (%s) No PRM was made" % rospy.get_name())
 
 def wait_for_sensing():
+
+    rospy.loginfo("KCL: (%s) Triggering the visibility update" % rospy.get_name())
+    vispub.publish("update_1")
+    vispub.publish("update_2")
+
     # wait for the sensing interface to catch up
     rospy.loginfo("KCL: (%s) Waiting for visibility to be added to KB" % rospy.get_name())
     propcount = 0
@@ -162,8 +173,8 @@ try:
                 if planning_time>=10.00:
                     # timeout, stop here
                     sample_count = max_prm_size
-                    # not a timeout, try again
                 else:
+                    # not a timeout, try again
                     sample_count += 1
             else:
                 # Wait for plan
@@ -176,6 +187,7 @@ try:
             plan_failed()
 
     ### SAMPLING APPROACH ###
+    resamples = 0
     if approach == 0 or approach == 2:
 
         make_prm(max_prm_size)
@@ -199,7 +211,14 @@ try:
             plan_found = generate_problem_and_plan()
 
             if not plan_found:
-                sample_count += 4
+                if planning_time>=10.00 and approach==0:
+                    if resamples>4:
+                        break
+                    # timeout, decrease sample size
+                    sample_count -= 4
+                    resamples += 1
+                else:
+                    sample_count += 4
             else:
                 # Wait for plan
                 while not rospy.is_shutdown() and not plan_recieved:

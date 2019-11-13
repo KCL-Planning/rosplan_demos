@@ -1,6 +1,6 @@
 functions:
     - $(find rosplan_demo_stage)/scripts/sampling_sensing_functions.py
-#topics:
+topics:
 #    robot_at:
 #        params:
 #            - kenny
@@ -8,12 +8,19 @@ functions:
 #        topic: /amcl_pose
 #        msg_type: geometry_msgs/PoseWithCovarianceStamped
 
-services:
     doughnut_visible_from:
         params:
             - '*'
             - '*'
-        service: /rosplan_knowledge_base/state/instances
-        srv_type: rosplan_knowledge_msgs/GetInstanceService
-        time_between_calls: 0.5
-        request: GetInstanceServiceRequest(type_name="waypoint")
+        topic: /update_visibility
+        msg_type: std_msgs/String
+
+#services:
+#    doughnut_visible_from:
+#        params:
+#            - '*'
+#            - '*'
+#        service: /rosplan_knowledge_base/state/instances
+#        srv_type: rosplan_knowledge_msgs/GetInstanceService
+#        time_between_calls: 0.5
+#        request: GetInstanceServiceRequest(type_name="waypoint")
