@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <launch>
 
-    <param name="/use_sim_time" value="true"/>
 
     <!-- Important Experiment Arguments -->
     <arg name="approach"         default="0" />
@@ -11,6 +10,8 @@
     <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_12doughnuts_variant04.yaml" />
     <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_12doughnuts_variant04.yaml.pddl" />
 
+    <param name="/use_sim_time" value="$(arg rviz)"/>
+
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="map_file" default="$(find rosplan_demo_stage)/maps/simple_house.yaml"/>
@@ -18,10 +19,6 @@
     <arg name="local_param_file" default="$(find rosplan_demo_stage)/config/local_costmap_params.yaml"/>
     <arg name="global_param_file" default="$(find rosplan_demo_stage)/config/global_costmap_params.yaml"/>
     <arg name="animate_sampling" default="false" />
-
-    <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/simple_house.world" respawn="false" output="log">
-    </node>
 
     <!-- Map server -->
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
@@ -112,6 +109,9 @@
     <group if="$(arg rviz)">
         <!-- visualisation of robot sensor data -->
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_demo_stage)/config/turtlebot3.rviz" />
+
+        <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
+        <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/simple_house.world" respawn="false" output="log"/>
     </group>
 
     <!-- main coordinator -->
@@ -129,4 +129,10 @@
         <param name="approach"               value="$(arg approach)" />
     </node>
 
+
+    <group unless="$(arg rviz)">
+        <node pkg="rostopic" type="rostopic" name="rostopic_odom" args="pub -r 0.5 /odom nav_msgs/Odometry &quot;{header: {seq: 0, stamp: {secs: 0, nsecs: 0}, frame_id: 'odom'}, child_frame_id: '', pose: {pose: {position: {x: 0.0, y: 0.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}, covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}, twist: {twist: {linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}, covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}&quot;" output="screen" />
+
+        <node pkg="tf" type="static_transform_publisher" name="odom_map_tf" args="-6.673 -5.326 0.000 0.000 0.000 -0.006 1.000 odom map 100" />
+    </group>
 </launch>
