@@ -5,7 +5,7 @@
 
     <!-- Important Experiment Arguments -->
     <arg name="approach"         default="0" />
-    <arg name="max_sample_size"  default="10" />
+    <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
     <arg name="rviz"             default="true" />
     <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_12doughnuts_variant04.yaml" />

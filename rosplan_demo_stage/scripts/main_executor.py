@@ -102,9 +102,7 @@ def generate_problem_and_plan():
     start = time.time()
     pi_response = pi(domain_path, problem_path, data_path, planner_command, True)
     end = time.time()
-
     planning_time = (end - start)
-    print str(planning_time) + "-----------------------------------------------------------=="
 
     if not pi_response:
         rospy.logerr("KCL: (%s) No response from the planning server." % rospy.get_name())
@@ -171,7 +169,7 @@ try:
 
         make_prm(max_prm_size)
 
-        sample_count = 4
+        sample_count = 12
         goal_achieved = False
         if approach==2:
             max_sample_size = sample_count + 1
@@ -190,7 +188,7 @@ try:
             plan_found = generate_problem_and_plan()
 
             if not plan_found:
-                sample_count += 1
+                sample_count += 4
             else:
                 # Wait for plan
                 while not rospy.is_shutdown() and not plan_recieved:
