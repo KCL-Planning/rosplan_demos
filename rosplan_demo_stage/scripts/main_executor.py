@@ -142,7 +142,7 @@ def plan_cost():
 
 ### EXPERIMENT ###
 try:
-
+    rospy.sleep(1)
     ### PRM APPROACH ###
     if approach == 1:
         sample_count = 3
