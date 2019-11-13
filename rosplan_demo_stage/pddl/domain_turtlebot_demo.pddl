@@ -26,7 +26,7 @@
 ;; Move between any two waypoints, avoiding terrain
 (:durative-action goto_waypoint
 	:parameters (?v - robot ?from ?to - waypoint)
-	:duration ( = ?duration 10) ;; TODO (distance ?from ?to))
+	:duration ( = ?duration (distance ?from ?to))
 	:condition (and
 		(at start (robot_at ?v ?from)))
 	:effect (and

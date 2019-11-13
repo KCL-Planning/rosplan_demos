@@ -76,6 +76,10 @@ def doughnut_visible_from(res, params):
     ret_value = []
     skip_check = False
 
+    waypoint_namespace = "/task_planning_waypoints"
+    if rospy.has_param('~waypoint_namespace'):
+        waypoint_namespace = rospy.get_param('~waypoint_namespace')
+
     # load and check KB for objects
     doughnuts = []
     if rospy.has_param('~doughnuts'):
@@ -101,8 +105,8 @@ def doughnut_visible_from(res, params):
 
     # load and check KB for waypoints
     waypoints = []
-    if rospy.has_param("/task_planning_waypoints"):
-        waypoints = rospy.get_param('/task_planning_waypoints')
+    if rospy.has_param(waypoint_namespace):
+        waypoints = rospy.get_param(waypoint_namespace)
     if len(params[0]) != len(waypoints):
         del params[0][:]
         # waypoints not properly loaded yet, add to KB
@@ -161,11 +165,11 @@ def doughnut_visible_from(res, params):
                     visible = True
 
             # fetch the doughnut requirements
-            if rospy.has_param("/task_planning_waypoints/"+wp):
+            if rospy.has_param(waypoint_namespace+"/"+wp):
 
                 pose = []
                 try:
-                    pose = rospy.get_param("/task_planning_waypoints/"+wp)
+                    pose = rospy.get_param(waypoint_namespace+"/"+wp)
                 except KeyError, e:
                     return ret_value
 

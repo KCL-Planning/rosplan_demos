@@ -8,8 +8,8 @@
     <arg name="max_sample_size"  default="10" />
     <arg name="max_prm_size"     default="1000" />
     <arg name="rviz"             default="true" />
-    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_50doughnuts_variant04.yaml" />
-    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_50doughnuts_variant04.yaml.pddl" />
+    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_12doughnuts_variant04.yaml" />
+    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_12doughnuts_variant04.yaml.pddl" />
 
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
@@ -36,8 +36,8 @@
 
     <!-- roadmap (random waypoint generation) -->
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
-        <arg name="use_static_map" value="true" />
-        <arg name="update_waypoints" value="$(eval arg('approach')==1)" />
+        <arg name="use_static_map"      value="true" />
+        <arg name="update_waypoints"    value="$(eval arg('approach')==1)" />
         <arg name="update_connectivity" value="$(eval arg('approach')==1)" />
         <arg name="wp_reference_frame"  value="/map" />
         <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
@@ -60,6 +60,8 @@
         <rosparam command="load" file="$(find rosplan_demo_stage)/config/turtlebot_stage_sensing.yaml" />
         <rosparam file="$(arg objects_file)" command="load" />
         <param name="main_rate"  value="10" />
+        <!-- override the waypoint namespace to use the PRM waypoints -->
+        <param name="waypoint_namespace"  value="/rosplan_demo_waypoints/wp" if="$(eval arg('approach')==1)"/>
     </node>
 
     <!-- sampling approach -->
@@ -121,6 +123,8 @@
         <param name="autom_gen_problem_path" value="$(find rosplan_demo_stage)/pddl/generated_problem.pddl" />
         <param name="domain_path"            value="$(find rosplan_demo_stage)/pddl/domain_turtlebot_demo.pddl" />
         <param name="data_path"              value="$(find rosplan_demo_stage)/pddl/" />
+        <param name="results_path"           value="$(find rosplan_demo_stage)/pddl/results.csv" />
+        <param name="initial_state"          value="$(arg initial_state)" />
         <param name="planner_command"        value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
         <param name="approach"               value="$(arg approach)" />
     </node>
