@@ -6,9 +6,10 @@
     <arg name="approach"         default="0" />
     <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
-    <arg name="rviz"             default="true" />
-    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_12doughnuts_variant04.yaml" />
-    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_12doughnuts_variant04.yaml.pddl" />
+    <arg name="rviz"             default="false" />
+    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_25doughnuts_variant04.yaml" />
+    <arg name="hppit_file"     default="$(find hidden_costs_generator)/maps/objects-sarah5.yaml" />
+    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_25doughnuts_variant04.yaml.pddl" />
 
     <param name="/use_sim_time" value="$(arg rviz)"/>
 
@@ -71,7 +72,8 @@
             <param name="wp_namespace_input"  value="/rosplan_demo_waypoints" />
             <param name="wp_namespace_output" value="/task_planning_waypoints" />
             <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
-            <param name="costmap_topic"       value="/costmap" />
+            <!--<param name="costmap_topic"       value="/costmap" />-->
+            <param name="costmap_topic"       value="/merged_map" />
 
             <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
             <param name="minimum_sample_separation" value="1.6" />
@@ -83,6 +85,7 @@
         <!-- hidden costmaps -->
         <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
             <rosparam file="$(arg objects_file)" command="load" />
+            <rosparam file="$(arg hppit_file)" command="load" />
         </node>
     </group>
 
