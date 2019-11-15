@@ -135,15 +135,49 @@ def plan_cost():
     t2 = action_list[len(action_list)-1].split("[")[1].split("]")[0]
     plan_duration = float(t1) + float(t2)
 
+    # get the cost parameters for waypoints
+    wp_costs = rospy.get_param('/task_planning_waypoints_pref')
+    print wp_costs
+
     # get distance travelled
     total_distance = 0
+    total_cost = 0
+    current_wp_cost = 0
+    old_time = 0
     for a in action_list:
-        if a.find("goto_waypoint"):
+        if "goto_waypoint" in a:
+
             ta = a.split("[")[1].split("]")[0]
             total_distance += float(ta)
+
+            print "======================"
+            print a
+            new_time = a.split(" ")[0][0:len(a.split(" ")[0])-1]
+            print "new time stamp: "+new_time
+            time_at_wp = float(new_time) - old_time
+            old_time = float(new_time)
+            incurred_cost = time_at_wp * current_wp_cost
+            total_cost = total_cost + incurred_cost
+            print "increasing cost by: " + str(time_at_wp) + " * " + str(current_wp_cost) + " = " +  str(incurred_cost)
+
+            print "----------------------"
+            # 0:dispatch_time 1:action_name 2:vehicle 3:from 4:to) 5:duration
+            ta = a.split(" ")[4][0:len(a.split(" ")[4])-1]
+            print "new wp: " + ta
+            current_wp_cost = 100 - wp_costs[ta]
+            print "new wp cost: " + str(current_wp_cost)
+
+
+    print "======================"
+    print "final time: " + str(plan_duration)
+    time_at_wp = plan_duration - old_time
+    incurred_cost = time_at_wp * current_wp_cost
+    total_cost = total_cost + incurred_cost
+    print "increasing cost by: " + str(time_at_wp) + " * " + str(current_wp_cost) + " = " +  str(incurred_cost) 
+
     try:
         f = open(results_path, "a")
-        f.write(str(approach)+","+os.path.basename(initial_state)+","+str(plan_duration)+","+str(total_distance)+","+str(planning_time)+"\n")
+        f.write(str(approach)+","+os.path.basename(initial_state)+","+str(plan_duration)+","+str(total_distance)+","+str(planning_time)+","+str(total_cost)+"\n")
     except:
         rospy.logerr("KCL: (%s) Error writing to results file." % rospy.get_name())     
     finally:
@@ -216,9 +250,11 @@ try:
                         break
                     # timeout, decrease sample size
                     sample_count -= 4
+                    if sample_count < 8:
+                        sample_count = 8
                     resamples += 1
                 else:
-                    sample_count += 4
+                    sample_count += 2
             else:
                 # Wait for plan
                 while not rospy.is_shutdown() and not plan_recieved:
