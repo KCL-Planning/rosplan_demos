@@ -7,9 +7,9 @@
     <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
     <arg name="rviz"             default="false" />
-    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_25doughnuts_variant04.yaml" />
-    <arg name="hppit_file"     default="$(find hidden_costs_generator)/maps/objects-sarah5.yaml" />
-    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_25doughnuts_variant04.yaml.pddl" />
+    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_30doughnuts_variant00.yaml" />
+    <arg name="hppit_file"       default="$(find hidden_costs_generator)/maps/objects-empty.yaml" />
+    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_30doughnuts_variant00.yaml.pddl" />
 
     <param name="/use_sim_time" value="$(arg rviz)"/>
 
@@ -124,7 +124,7 @@
 
     <!-- main coordinator -->
     <!-- 0: sampling, 1: PRM, 2: Fixed WPs -->
-    <node pkg="rosplan_demo_stage" type="main_executor.py" name="coordinator" respawn="false" required="true" output="screen">
+    <node pkg="rosplan_demo_stage" type="main_executor.py" name="coordinator" respawn="false" required="false" output="screen">
         <param name="wait_for_rviz"          value="$(arg rviz)" />
         <param name="max_sample_size"        value="$(arg max_sample_size)" />
         <param name="max_prm_size"           value="$(arg max_prm_size)" />

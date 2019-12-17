@@ -5,6 +5,8 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /localisation1/LaserScan1
+        - /Waypoints1
+        - /Waypoints1/WPs1
         - /Maps1/Map1
       Splitter Ratio: 0.5055555701255798
     Tree Height: 724
@@ -248,7 +250,7 @@ Visualization Manager:
           Marker Topic: /doughnut_visible_from
           Name: PedestalVisibility
           Namespaces:
-            "": true
+            {}
           Queue Size: 1
           Value: true
       Enabled: true
@@ -334,11 +336,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 61.86355972290039
+      Scale: 59.22922897338867
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 7.151993274688721
-      Y: 4.916505336761475
+      X: 6.623427867889404
+      Y: 5.22633171081543
     Saved: ~
 Window Geometry:
   Displays:

@@ -5,14 +5,14 @@
 
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
-    <arg name="map_file" default="$(find rosplan_demo_stage)/maps/simple_house.yaml"/>
+    <arg name="map_file" default="$(find rosplan_demo_stage)/maps/maze1.yaml"/>
     <arg name="common_param_file" default="$(find rosplan_demo_stage)/config/costmap_common_params_waffle.yaml"/>
     <arg name="local_param_file" default="$(find rosplan_demo_stage)/config/local_costmap_params.yaml"/>
     <arg name="global_param_file" default="$(find rosplan_demo_stage)/config/global_costmap_params.yaml"/>
 
 
     <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/simple_house.world" respawn="false" output="screen">
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_demo_stage)/world/maze1.world" respawn="false" output="screen">
     </node>
 
     <!-- Map server -->
@@ -39,8 +39,8 @@
     <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
         <arg name="scan_topic" value="base_scan" />
         <!-- initial values match the stage world file -->
-        <arg name="initial_pose_x" value="6.525"/>
-        <arg name="initial_pose_y" value="5.375"/>
+        <arg name="initial_pose_x" value="2.000"/>
+        <arg name="initial_pose_y" value="2.000"/>
         <arg name="initial_pose_a" value="0.000"/>
     </include>
 
@@ -52,7 +52,7 @@
     </include>
 
     <!-- waypoint filtering node (roadmap) -->
-    <node pkg="rosplan_waypoint_sampling" name="roadmap_filter" type="rp_roadmap_filter" output="screen">
+    <node pkg="rosplan_interface_mapping" name="roadmap_filter" type="rp_roadmap_filter" output="screen">
         <param name="srv_timeout"         value="6" />
         <param name="waypoint_count"      value="20" />
         <param name="wp_reference_frame"  value="map" />
@@ -63,9 +63,10 @@
     </node>
 
     <!-- hidden costmaps -->
-    <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
-        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_simple_house.yaml" command="load" />
+    <node pkg="rosplan_interface_mapping" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
+        <rosparam file="$(find rosplan_demo_stage)/config/hidden_costmap_maze1.yaml" command="load" />
     </node>
+
 
     <!-- ROSPlan -->
     <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
