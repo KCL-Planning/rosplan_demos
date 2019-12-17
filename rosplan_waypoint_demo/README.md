@@ -2,15 +2,16 @@
 
 This package contains:
 
-- launch files for two different worlds in [Stage](http://wiki.ros.org/stage).
+- Launch files for two different worlds in [Stage](http://wiki.ros.org/stage).
 - PDDL files for the inspection mission.
 - Scripts to control the mission, including waypoint generation, sampling, task plannning, and exectuion.
 - A configuration and script for the ROSPlan sensing interface.
 
-#### Demo brief description
+### Demo Description
 
-The demo has been tested with ROS melodic. The demo is an inspection mission that illustrates **Task-Aware Waypoint Sampling**. The demo should do the following:
-1. The simulation, rviz visualisation, and ROSPlan nodes are launched.
+The demo has been tested with ROS melodic. The demo is an inspection mission that illustrates *Task-Aware Waypoint Sampling*. The demo should do the following:
+
+1.  The simulation, rviz visualisation, and ROSPlan nodes are launched.
 2. A goal is posted to deliver an order, which requires making several inspections.
 3. A probabilistic roadmap is generated, **N** waypoints are sampled, and loaded into the ROSPlan knowledge base as PDDL objects.
 4. The planner is called to generate a plan.
@@ -20,63 +21,26 @@ The demo has been tested with ROS melodic. The demo is an inspection mission tha
 
 See image below showing the demo and rviz visualisation.
 
-![demo screenshot](rosplan_waypoint_demo.png?raw=true)
+<img alt="demo screenshot" src="rosplan_waypoint_demo.png" width="50%">
 
-### Turtlebot PDDL domain
+### Installation
 
-The PDDL domain definition can be found under `rosplan_demo_stage` package -> `pddl/domain_turtlebot_demo.pddl`:
+### Running
 
-```
-roscd rosplan_demo_stage/pddl
-cat domain_turtlebot_demo.pddl
-```
-### Run instructions
-
-*1.* Export the turtlebot 3 configuration, e.g.:
+-  **Export the Turtlebot3 configuration**
 ```
 export TURTLEBOT3_MODEL=waffle
 ```
-
-*2.* In a first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `lt13.launch` from the `rosplan_demo_stage` package:
+- **Launch the demo**  
+Begin the simulation, rviz visualisation, and ROSPlan nodes using the `lt13_filtering.launch`:
 ```
-roslaunch rosplan_demo_stage lt13.launch
+roslaunch rosplan_demo_stage lt13_filtering.launch
 ```
-
-*3.* In a second terminal generate the probabilistic roadmap using a service call to the `rosplan_roadmap_server`:
-```
-rosservice call /rosplan_roadmap_server/create_prm "{nr_waypoints: 75, min_distance: 1.2, casting_distance: 2.4, connecting_distance: 4.8, occupancy_threshold: 50, total_attempts: 100000}"
-```
-This service call uses the following parameters:
-- `nr_waypoints`: The number of waypints to attempt to generate (75).
-- `min_distance`: The closest two waypoints are allowed to be (1.2m).
-- `casting_distance`: When a waypoint is generated, it will be this distance from its parent (2.4m).
-- `connecting_distance`: Edges can be declared in the PDDL problem between any pair of waypoints at least this close (4.8m). However, the launch file disables edges.
-- `occupancy_threshold`: A cell in the costmap will be considered collision-free if it is less than this value (90).
-- `total_attempts`: The maximum number of attempts to generate a waypoint. This limits the PRM generation time, and might mean that less than 75 waypoints are generated in total (for example, if the min_distance is too high and there is not enough space available).
-
-*4.* In a second terminal run `turtlebot_explore_common.bash`, a script which:
-- Adds to the knowledge base the robot PDDL object and the facts which comprise the initial state.
-- Adds the goals (to visit all waypoints) the knowledge base.
-- Calls the ROSPlan services which generate a plan and dispatch it.
-```
-rosrun rosplan_turtlebot3_demo turtlebot_explore_common.bash
-```
-
-The turtlebot will move around the waypoints, exploring the environment. You should see output in the first terminal, something like:
-```
-...
-KCL: (/rosplan_problem_interface) (problem.pddl) Generating problem file.
-KCL: (/rosplan_problem_interface) (problem.pddl) The problem was generated.
-KCL: (/rosplan_planner_interface) Problem received.
-KCL: (/rosplan_planner_interface) (problem.pddl) Writing problem to file.
-KCL: (/rosplan_planner_interface) (problem.pddl) Running: timeout 10 /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_planning_system/common/bin/popf /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/domain_turtlebot_demo.pddl /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/problem.pddl > /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/plan.pddl
-KCL: (/rosplan_planner_interface) (problem.pddl) Planning complete
-KCL: (/rosplan_planner_interface) (problem.pddl) Plan was solved.
-KCL: (/rosplan_parsing_interface) Planner output received.
-KCL: (/rosplan_parsing_interface) Parsing planner output.
-KCL: (/rosplan_plan_dispatcher) Plan received.
-KCL: (/rosplan_plan_dispatcher) Dispatching plan.
-KCL: (/rosplan_plan_dispatcher) Dispatching action [0, goto_waypoint, 0.804106, 10.000000]
-KCL: (/rosplan_plan_dispatcher) Feedback received [0, action enabled]
-...
-```
+The launch file has the following useful arguments:
+  - *approach*: sets the approach to waypoints generation; (0: task-aware waypoint sampling, 1: single dense PRM, 2: fixed waypoint generation).
+  - *max_sample_size*: the maximum number of waypoints that will be sampled using the task-aware waypoint sampling approach before returning failure. The default is 50.
+  - *max_prm_size*: the size of the PRM from which to sample waypoints, or the maximum size of the PRM in approach 1. The default is 1000 nodes.
+  - *rviz*: if set to *false*, then the STAGE and RVIZ windows will not be displayed.
+  - *objects_file*: path to the object configuration file that specifies the initial positions of each machine in the world. A number of these configuration files are available in the ROB-IS repository.
+  - *hppit_file*: optional path to the hidden cost configuration file that speficies some additional preferences over where the robot is allowed to perform inspections. A number of these configuration files are available in the ROB-IS repository.
+  - *initial_state*: the initial state file that specifies the goal for the problem, and corresponds to the objects file. These are also available in the ROB-IS repository.
