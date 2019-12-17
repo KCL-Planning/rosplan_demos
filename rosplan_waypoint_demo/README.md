@@ -1,4 +1,4 @@
-# rosplan_demo_stage
+# Task-Aware Waypoint Sampling
 
 This package contains:
 
