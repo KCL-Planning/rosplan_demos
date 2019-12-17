@@ -21,7 +21,7 @@ The demo has been tested with ROS melodic. The demo is an inspection mission tha
 
 See image below showing the demo and rviz visualisation.
 
-<img alt="demo screenshot" src="rosplan_waypoint_demo.png" width="50%">
+<img alt="demo screenshot" src="rosplan_waypoint_demo.png" width="50%" style="margin: 0 auto 0 auto">
 
 ### Installation
 
