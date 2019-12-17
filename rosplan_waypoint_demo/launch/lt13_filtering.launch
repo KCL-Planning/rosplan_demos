@@ -6,7 +6,7 @@
     <arg name="approach"         default="0" />
     <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
-    <arg name="rviz"             default="false" />
+    <arg name="rviz"             default="true" />
     <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_30doughnuts_variant00.yaml" />
     <arg name="hppit_file"       default="$(find hidden_costs_generator)/maps/objects-empty.yaml" />
     <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_30doughnuts_variant00.yaml.pddl" />
