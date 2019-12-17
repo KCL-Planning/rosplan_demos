@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
-  <name>rosplan_demo_stage</name>
+  <name>rosplan_stage_demo</name>
   <version>1.0.0</version>
   <description>
-    Simple simulation with turtlebot3 in stage.
+    Simple simulation of a robot in stage, for use with other ROSPlan demos.
   </description>
   <maintainer email="michael.cashmore@kcl.ac.uk">Michael Cashmore</maintainer>
 

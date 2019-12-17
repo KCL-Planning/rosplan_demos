@@ -2,7 +2,7 @@
 
 This package contains:
 
-- launch files for different robot simulations in with [Stage](http://wiki.ros.org/stage).
+- An example launch file for a robot simulation in [Stage](http://wiki.ros.org/stage).
 - Stage world files, maps, and configuration files.
 
 #### Demo brief description

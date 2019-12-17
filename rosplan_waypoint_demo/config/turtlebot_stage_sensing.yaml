@@ -1,5 +1,5 @@
 functions:
-    - $(find rosplan_demo_stage)/scripts/sampling_sensing_functions.py
+    - $(find rosplan_waypoint_demo)/scripts/sampling_sensing_functions.py
 topics:
     doughnut_visible_from:
         params:
