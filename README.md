@@ -6,11 +6,11 @@ Each demo package contains a README with description and instructions for both i
 
 ### Stage Demos
 
-- **Stage Demo** [*rosplan_stage_demo*](tree/master/rosplan_stage_demo) (melodic)  
+- **Stage Demo** [*rosplan_stage_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_stage_demo) (melodic)  
 This demo uses the STAGE simulation, spawning a single robot in simulation. This demo contains the base maps and launches upon which the other stage demos are built.
 <center><img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_stage_demo/stage_demo.png" width="50%"></center>
 
-- **Task-Aware Waypoint Sampling** [*rosplan_waypoint_demo*](tree/master/rosplan_waypoint_demo) (melodic)  
+- **Task-Aware Waypoint Sampling** [*rosplan_waypoint_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_waypoint_demo) (melodic)  
 This demonstrates [ROB-IS](https://github.com/sarah-keren/ROB-IS) and builds upon the STAGE demo. The robot is required to complete inspection missions and uses the ROB-IS package for task-aware waypoint sampling.
 <center><img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_waypoint_demo/rosplan_waypoint_demo.png" width="25%"></center>
 
