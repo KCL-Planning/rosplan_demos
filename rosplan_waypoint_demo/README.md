@@ -47,15 +47,14 @@ export TURTLEBOT3_MODEL=waffle
 source devel/setup.bash
 ```
 - **Launch the demo**  
-Begin the simulation, rviz visualisation, and ROSPlan nodes using `lt13_filtering.launch`:
+Begin the simulation, rviz visualisation, and ROSPlan nodes using `lt13_sampling.launch`:
 ```
-roslaunch rosplan_waypoint_demo lt13_filtering.launch
+roslaunch rosplan_waypoint_demo lt13_sampling.launch
 ```
 The launch file has the following arguments:
   - *approach*: sets the approach to waypoints generation; (0: task-aware waypoint sampling, 1: single dense PRM, 2: fixed waypoint generation). See the next section for more information on each approach.
   - *max_sample_size*: the maximum number of waypoints that will be sampled using the task-aware waypoint sampling approach before returning failure. The default is 50.
   - *max_prm_size*: the size of the PRM from which to sample waypoints, or the maximum size of the PRM in approach 1. The default is 1000 nodes.
-  - *rviz*: if set to *false*, then the STAGE and rviz windows will not be displayed.
   - *objects_file*: path to the object configuration file that specifies the initial positions of each machine in the world. A number of these configuration files are available in the ROB-IS repository.
   - *hppit_file*: optional path to the hidden cost configuration file that specifies some additional preferences over where the robot is allowed to perform inspections. A number of these configuration files are available in the ROB-IS repository.
   - *initial_state*: the initial state file that specifies the goal for the problem, and corresponds to the objects file. These are also available in the ROB-IS repository.
