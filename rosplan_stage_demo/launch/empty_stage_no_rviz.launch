@@ -42,7 +42,4 @@
         <arg name="initial_pose_a" value="0.000"/>
     </include>
 
-    <!-- visualisation of robot sensor data -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_demo)/config/rosplan_stage_demo.rviz" />
-
 </launch>
