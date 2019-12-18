@@ -1,13 +1,14 @@
-# rosplan_demo_stage
+# Stage Demo
 
-This package contains:
+This package contains the base maps and launches upon which the other stage demos are built. Please look to the other demos in this repository for demonstrations of different planning and execution tools with ROSPlan.
 
+The package contains:
 - An example launch file for a robot simulation in [Stage](http://wiki.ros.org/stage).
 - Stage world files, maps, and configuration files.
 
 #### Demo Description
 
-The demo has been tested with ROS melodic. This demo is the base maps/launches/configuration upon which the other stage demos are built.
+The demo has been tested with ROS melodic.
 
 The demo launches a Stage simulation with the following components:
 - *stageros* simulation node.
