@@ -1,15 +1,18 @@
 <?xml version="1.0"?>
 <launch>
 
+    <param name="/use_sim_time" value="true"/>
+
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="map_file" default="$(find rosplan_stage_demo)/maps/simple_house.yaml"/>
+    <arg name="world_file" default="$(find rosplan_stage_demo)/world/simple_house.world"/>
     <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
     <arg name="local_param_file" default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
     <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
 
     <!-- stage simulation -->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rosplan_stage_demo)/world/simple_house.world" respawn="false" output="log"/>
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(arg world_file)" respawn="false" output="log"/>
 
     <!-- Map server -->
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
@@ -19,7 +22,7 @@
     </include>
 
     <!-- move_base -->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log">
         <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
         <rosparam file="$(arg common_param_file)" command="load" ns="global_costmap" />
         <rosparam file="$(arg local_param_file)" command="load" />
