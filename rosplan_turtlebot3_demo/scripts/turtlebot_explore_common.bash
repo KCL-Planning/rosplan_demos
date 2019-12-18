@@ -10,7 +10,18 @@ param="knowledge:
   instance_name: 'kenny'
   attribute_name: ''
   function_value: 0.0";
-for i in $(seq 1 $(( $(rosservice call /rosplan_knowledge_base/state/instances "type_name: 'waypoint'" | sed 's/wp/\n/g' | wc -l) - 2)) )
+param_type="$param_type
+- 0";
+param="$param
+- knowledge_type: 1
+  instance_type: ''
+  instance_name: ''
+  attribute_name: 'robot_at'
+  values:
+  - {key: 'r', value: 'kenny'}
+  - {key: 'wp', value: 'wp0'}
+  function_value: 0.0";
+for i in $(rosservice call /rosplan_knowledge_base/state/instances "type_name: 'waypoint'" | grep -ohP "wp\d+")
 do
 param_type="$param_type
 - 1"
@@ -20,7 +31,7 @@ param="$param
   instance_name: ''
   attribute_name: 'visited'
   values:
-  - {key: 'wp', value: 'wp$i'}
+  - {key: 'wp', value: '$i'}
   function_value: 0.0"
 done;
 

@@ -10,6 +10,7 @@ namespace KCL_rosplan {
 
         // get waypoints reference frame from param server
         nh.param<std::string>("waypoint_frameid", waypoint_frameid_, "map");
+        nh.param<std::string>("wp_namespace", wp_namespace_, "/rosplan_demo_waypoints");
 
         // setup a move base clear costmap client (to be able to send clear costmap requests later on)
         clear_costmaps_client_ = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
@@ -19,8 +20,8 @@ namespace KCL_rosplan {
 
         ros::NodeHandle nh;
         std::vector<double> wp;
-        if(nh.hasParam("/rosplan_demo_waypoints/" + wpID)) {
-            if(nh.getParam("/rosplan_demo_waypoints/" + wpID, wp)) {
+        if(nh.hasParam(wp_namespace_ + "/" + wpID)) {
+            if(nh.getParam(wp_namespace_ + "/" + wpID, wp)) {
                 if(wp.size() == 3) {
                     result.header.frame_id = waypoint_frameid_;
                     result.pose.position.x = wp[0];

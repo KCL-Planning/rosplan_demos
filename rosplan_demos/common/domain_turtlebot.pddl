@@ -16,6 +16,10 @@
 	(dock_at ?wp - waypoint)
 )
 
+(:functions
+    (charge ?r - robot)
+)
+
 ;; Move to any waypoint, avoiding terrain
 (:durative-action goto_waypoint
 	:parameters (?v - robot ?from ?to - waypoint)
@@ -48,6 +52,7 @@
 		(at start (undocked ?v)))
 	:effect (and
 		(at end (docked ?v))
+		(at end (assign (charge ?v) 100))
 		(at start (not (undocked ?v))))
 )
 

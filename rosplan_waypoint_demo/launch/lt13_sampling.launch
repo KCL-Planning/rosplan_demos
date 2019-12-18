@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Important Experiment Arguments -->
+    <arg name="approach"         default="0" />
+    <arg name="max_sample_size"  default="50" />
+    <arg name="max_prm_size"     default="1000" />
+    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_15doughnuts_variant00.yaml" />
+    <arg name="hppit_file"       default="$(find hidden_costs_generator)/maps/objects-empty.yaml" />
+    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_15doughnuts_variant00.yaml.pddl" />
+
+    <!-- Arguments -->
+    <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="map_file" default="$(find rosplan_stage_demo)/maps/simple_house.yaml"/>
+    <arg name="world_file" default="$(find rosplan_stage_demo)/world/simple_house.world"/>
+    <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
+    <arg name="local_param_file" default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
+    <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
+
+    <!-- base stage demo -->
+    <include file="$(find rosplan_stage_demo)/launch/empty_stage_no_navigation.launch" >
+        <arg name="model"             value="$(arg model)" />
+        <arg name="map_file"          value="$(arg map_file)"/>
+        <arg name="world_file"        value="$(arg world_file)"/>
+        <arg name="common_param_file" value="$(arg common_param_file)"/>
+        <arg name="local_param_file"  value="$(arg local_param_file)"/>
+        <arg name="global_param_file" value="$(arg global_param_file)"/>
+    </include>
+
+    <!-- visualisation of robot sensor data -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_waypoint_demo)/config/waypoint_sampling.rviz" />
+
+    <!-- probabilistic roadmap generation -->
+    <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
+        <arg name="use_static_map"      value="true" />
+        <arg name="update_waypoints"    value="$(eval arg('approach')==1)" />
+        <arg name="update_connectivity" value="$(eval arg('approach')==1)" />
+        <arg name="wp_reference_frame"  value="/map" />
+        <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+        <arg name="costmap_topic"       value="/costmap" />
+    </include>
+
+    <!-- ROSPlan -->
+    <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
+        <arg name="domain_path" value="$(find rosplan_waypoint_demo)/pddl/domain_turtlebot_demo.pddl" />
+        <!-- load a particular initial state into KB at startup (optional) -->
+        <arg name="problem_path" value="$(arg initial_state)" />
+        <!-- automatically generated pddl problem will be created here -->
+        <arg name="autom_gen_problem_path" value="$(find rosplan_waypoint_demo)/pddl/generated_problem.pddl" />
+        <!-- planner will produce output plan and write to this location -->
+        <arg name="data_path" value="$(find rosplan_waypoint_demo)/pddl/" />
+    </include>
+
+    <!-- rosplan sensing interface -->
+    <node name="rosplan_sensing_interface" pkg="rosplan_sensing_interface" type="sensing_interface.py" respawn="false" output="log">
+        <rosparam command="load" file="$(find rosplan_waypoint_demo)/config/turtlebot_stage_sensing.yaml" />
+        <rosparam file="$(arg objects_file)" command="load" />
+        <param name="main_rate"  value="10" />
+        <!-- override the waypoint namespace to use the PRM waypoints -->
+        <param name="waypoint_namespace"  value="/rosplan_demo_waypoints/wp" if="$(eval arg('approach')==1)"/>
+    </node>
+
+    <!-- APPROACH 0: task-aware waypoint sampling -->
+    <group if="$(eval arg('approach')==0)">
+        <!-- waypoint filtering node (roadmap) -->
+        <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_roadmap_filter" output="screen">
+            <param name="srv_timeout"         value="6" />
+            <param name="waypoint_count"      value="20" />
+            <param name="wp_reference_frame"  value="map" />
+            <param name="wp_namespace_input"  value="/rosplan_demo_waypoints" />
+            <param name="wp_namespace_output" value="/task_planning_waypoints" />
+            <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+            <!--<param name="costmap_topic"       value="/costmap" />-->
+            <param name="costmap_topic"       value="/merged_map" />
+            <param name="hppits_topic"        value="/hppits_map" />
+
+            <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
+            <param name="minimum_sample_separation" value="1.6" />
+
+            <!-- Publish the modified probability distribution during sampling and slow things down a bit -->
+            <param name="animate_sampling" value="false" />
+        </node>
+    </group>
+
+    <!-- APPROACH 2: fixed waypoint approach -->
+    <group if="$(eval arg('approach')==2)">
+    
+        <!-- fixed waypoint generation node (1 per object) (roadmap) -->
+        <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_fixed_wp_gen" output="screen">
+            <param name="srv_timeout"         value="6" />
+            <param name="waypoint_count"      value="20" />
+            <param name="wp_reference_frame"  value="map" />
+            <param name="wp_namespace_input"  value="/rosplan_demo_waypoints" />
+            <param name="wp_namespace_output" value="/task_planning_waypoints" />
+            <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+            <param name="costmap_topic"       value="/costmap" />
+            <param name="hppits_topic"        value="/hppits_map" />
+
+            <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
+            <param name="minimum_sample_separation" value="1.6" />
+
+            <!-- Publish the modified probability distribution during sampling and slow things down a bit -->
+            <param name="animate_sampling" value="false" />
+            <rosparam file="$(arg objects_file)" command="load" />
+        </node>
+    </group>
+
+    <!-- hidden costmaps -->
+    <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
+        <rosparam file="$(arg objects_file)" command="load" />
+        <rosparam file="$(arg hppit_file)" command="load" />
+    </node>
+
+    <!-- main coordinator -->
+    <!-- 0: sampling, 1: PRM, 2: Fixed WPs -->
+    <node pkg="rosplan_waypoint_demo" type="main_executor.py" name="coordinator" respawn="false" required="false" output="screen">
+        <param name="wait_for_rviz"          value="true" />
+        <param name="max_sample_size"        value="$(arg max_sample_size)" />
+        <param name="max_prm_size"           value="$(arg max_prm_size)" />
+        <param name="autom_gen_problem_path" value="$(find rosplan_waypoint_demo)/pddl/generated_problem.pddl" />
+        <param name="domain_path"            value="$(find rosplan_waypoint_demo)/pddl/domain_turtlebot_demo.pddl" />
+        <param name="data_path"              value="$(find rosplan_waypoint_demo)/pddl/" />
+        <param name="results_path"           value="$(find rosplan_waypoint_demo)/pddl/results.csv" />
+        <param name="initial_state"          value="$(arg initial_state)" />
+        <param name="planner_command"        value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
+        <param name="approach"               value="$(arg approach)" />
+    </node>
+</launch>
