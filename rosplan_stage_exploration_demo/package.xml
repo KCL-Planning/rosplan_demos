@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>rosplan_stage_exploration_demo</name>
+  <version>1.0.0</version>
+  <description>
+    Extends rosplan_stage_demo, a simulation of a robot in STAGE. This demo has a robot plan to visit a set of waypoints, and then execute that plan.
+  </description>
+  <maintainer email="michael.cashmore@kcl.ac.uk">Michael Cashmore</maintainer>
+
+  <license>BSD</license>
+  <url type="website">http://github.com/KCL-Planning/rosplan_demos</url>
+  <author email="michael.cashmore@strath.ac.uk">Michael Cashmore</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
