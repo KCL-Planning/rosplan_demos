@@ -5,9 +5,9 @@
     <arg name="approach"         default="0" />
     <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
-    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_15doughnuts_variant00.yaml" />
+    <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_20doughnuts_variant00.yaml" />
     <arg name="hppit_file"       default="$(find hidden_costs_generator)/maps/objects-empty.yaml" />
-    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_15doughnuts_variant00.yaml.pddl" />
+    <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_20doughnuts_variant00.yaml.pddl" />
 
     <!-- Arguments -->
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
@@ -28,7 +28,7 @@
     </include>
 
     <!-- visualisation of robot sensor data -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_waypoint_demo)/config/waypoint_sampling.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_waypoint_demo)/config/waypoint_sampling.rviz" />
 
     <!-- probabilistic roadmap generation -->
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
@@ -42,18 +42,18 @@
 
     <!-- ROSPlan -->
     <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
-        <arg name="domain_path" value="$(find rosplan_waypoint_demo)/pddl/domain_turtlebot_demo.pddl" />
+        <arg name="domain_path" value="$(find rosplan_stage_waypoint_demo)/pddl/domain_turtlebot_demo.pddl" />
         <!-- load a particular initial state into KB at startup (optional) -->
         <arg name="problem_path" value="$(arg initial_state)" />
         <!-- automatically generated pddl problem will be created here -->
-        <arg name="autom_gen_problem_path" value="$(find rosplan_waypoint_demo)/pddl/generated_problem.pddl" />
+        <arg name="autom_gen_problem_path" value="$(find rosplan_stage_waypoint_demo)/pddl/generated_problem.pddl" />
         <!-- planner will produce output plan and write to this location -->
-        <arg name="data_path" value="$(find rosplan_waypoint_demo)/pddl/" />
+        <arg name="data_path" value="$(find rosplan_stage_waypoint_demo)/pddl/" />
     </include>
 
     <!-- rosplan sensing interface -->
-    <node name="rosplan_sensing_interface" pkg="rosplan_sensing_interface" type="sensing_interface.py" respawn="false" output="log">
-        <rosparam command="load" file="$(find rosplan_waypoint_demo)/config/turtlebot_stage_sensing.yaml" />
+    <node name="rosplan_sensing_interface" pkg="rosplan_sensing_interface" type="sensing_interface.py" respawn="false" output="screen">
+        <rosparam command="load" file="$(find rosplan_stage_waypoint_demo)/config/turtlebot_stage_sensing.yaml" />
         <rosparam file="$(arg objects_file)" command="load" />
         <param name="main_rate"  value="10" />
         <!-- override the waypoint namespace to use the PRM waypoints -->
@@ -113,14 +113,14 @@
 
     <!-- main coordinator -->
     <!-- 0: sampling, 1: PRM, 2: Fixed WPs -->
-    <node pkg="rosplan_waypoint_demo" type="main_executor.py" name="coordinator" respawn="false" required="false" output="screen">
+    <node pkg="rosplan_stage_waypoint_demo" type="main_executor.py" name="coordinator" respawn="false" required="false" output="screen">
         <param name="wait_for_rviz"          value="true" />
         <param name="max_sample_size"        value="$(arg max_sample_size)" />
         <param name="max_prm_size"           value="$(arg max_prm_size)" />
-        <param name="autom_gen_problem_path" value="$(find rosplan_waypoint_demo)/pddl/generated_problem.pddl" />
-        <param name="domain_path"            value="$(find rosplan_waypoint_demo)/pddl/domain_turtlebot_demo.pddl" />
-        <param name="data_path"              value="$(find rosplan_waypoint_demo)/pddl/" />
-        <param name="results_path"           value="$(find rosplan_waypoint_demo)/pddl/results.csv" />
+        <param name="autom_gen_problem_path" value="$(find rosplan_stage_waypoint_demo)/pddl/generated_problem.pddl" />
+        <param name="domain_path"            value="$(find rosplan_stage_waypoint_demo)/pddl/domain_turtlebot_demo.pddl" />
+        <param name="data_path"              value="$(find rosplan_stage_waypoint_demo)/pddl/" />
+        <param name="results_path"           value="$(find rosplan_stage_waypoint_demo)/pddl/results.csv" />
         <param name="initial_state"          value="$(arg initial_state)" />
         <param name="planner_command"        value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
         <param name="approach"               value="$(arg approach)" />

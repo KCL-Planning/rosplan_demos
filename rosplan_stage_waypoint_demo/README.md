@@ -49,7 +49,7 @@ source devel/setup.bash
 - **Launch the demo**  
 Begin the simulation, rviz visualisation, and ROSPlan nodes using `lt13_sampling.launch`:
 ```
-roslaunch rosplan_waypoint_demo lt13_sampling.launch
+roslaunch rosplan_stage_waypoint_demo lt13_sampling.launch
 ```
 The launch file has the following arguments:
   - *approach*: sets the approach to waypoints generation; (0: task-aware waypoint sampling, 1: single dense PRM, 2: fixed waypoint generation). See the next section for more information on each approach.
