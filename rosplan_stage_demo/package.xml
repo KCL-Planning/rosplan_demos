@@ -13,4 +13,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+	<run_depend>move_base_msgs</run_depend>
+	<run_depend>turtlebot3_navigation</run_depend>
+	<run_depend>dwa_local_planner</run_depend>
 </package>
