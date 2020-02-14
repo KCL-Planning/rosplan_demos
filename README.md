@@ -1,6 +1,6 @@
 # rosplan_demos
 
-[![Build Status](https://travis-ci.com/KCL-Planning/rosplan_demos.svg?branch=master)](https://travis-ci.com/KCL-Planning/rosplan_demos)
+![Build status](https://github.com/KCL-Planning/rosplan_demos/workflows/build/badge.svg)
 
 Each demo package contains a README with description and instructions for both installation and running.
 
