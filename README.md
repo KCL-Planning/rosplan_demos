@@ -21,5 +21,5 @@ This demonstrates [ROB-IS](https://github.com/sarah-keren/ROB-IS) and builds upo
 ### Gazebo Demos
 - **Turtlebot2 Exploration** [*rosplan_turtlebot2_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot2_demo) (kinetic)  
 This demo is a simple exploration mission. The robot visits randomly generated waypoints around a map.
-- **Turtlebot2 Exploration** [*rosplan_turtlebot3_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo) (melodic)  
+- **Turtlebot3 Exploration** [*rosplan_turtlebot3_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo) (melodic)  
 This demo is a simple exploration mission. The robot visits randomly generated waypoints around a map.
