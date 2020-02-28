@@ -11,6 +11,7 @@ Panels:
         - /navigation1/Local Map1
         - /navigation1/Global Map1
         - /rosplan wp vis1
+        - /rosplan wp vis1/Marker1
       Splitter Ratio: 0.5
     Tree Height: 943
   - Class: rviz/Selection
@@ -80,7 +81,33 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        caster_back_link:
+        camera_depth_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_depth_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_rgb_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_rgb_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        caster_back_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_back_right_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -297,20 +324,20 @@ Visualization Manager:
       Name: navigation
     - Class: rviz/Group
       Displays:
-        - Class: rviz/MarkerArray
+        - Class: rviz/Marker
           Enabled: true
           Marker Topic: /rosplan_roadmap_server/viz/waypoints
-          Name: waypoints
+          Name: Marker
           Namespaces:
-            mission_waypoint: true
-          Queue Size: 10
+            {}
+          Queue Size: 100
           Value: true
         - Class: rviz/Marker
           Enabled: true
           Marker Topic: /rosplan_roadmap_server/viz/edges
           Name: edges
           Namespaces:
-            mission_edges: true
+            {}
           Queue Size: 10
           Value: true
       Enabled: true
@@ -385,5 +412,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1920
-  X: 1920
-  Y: 0
+  X: 1520
+  Y: 27
