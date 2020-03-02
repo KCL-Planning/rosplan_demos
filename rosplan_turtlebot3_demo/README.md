@@ -34,17 +34,15 @@ catkin build
 
 Source the ROSPlan workspace and install runtime dependencies:
 ```
-rosdep install rosplan_turtlebot3_demo
-```
-
-Then source the ROSPlan workspace in two terminals.
-```
 source ~/rosplan_ws/devel/setup.bash
+rosdep install rosplan_turtlebot3_demo
 ```
 
 ## Run instructions
 
-*1.* Export the desired turtlebot 3 configuration, available options include: burger, waffle, waffle_pi, e.g.:
+NOTE: The demo requires 2 terminals.
+
+*1.* In the first terminal, export the desired turtlebot 3 configuration, available options include: burger, waffle, waffle_pi, e.g.:
 ```
 export TURTLEBOT3_MODEL=waffle
 ```
@@ -99,9 +97,12 @@ KCL: (/rosplan_plan_dispatcher) Dispatching action [0, goto_waypoint, 0.804106, 
 KCL: (/rosplan_plan_dispatcher) Feedback received [0, action enabled]
 ...
 ```
-NOTE: You might experience a rotating behavior on the robot (overshooting the local trajectory), this is a known issue, however it should make progress towards the goal and eventually reach the waypoints.
 
 ## Troubleshoot
+
+### Rotating behavior on the robot while navigating between waypoints.
+
+NOTE: You might experience a rotating behavior on the robot (overshooting the local trajectory). This is a known issue, however it should make progress towards the goal and eventually reach the waypoints. This could be fixed by tunning the parameters for the mobile base, however is out of the scope of this demo.
 
 ### Gazebo Turtlebot 3, invalid lookupTransform tf2 error (melodic)
 
