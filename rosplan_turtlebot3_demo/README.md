@@ -10,31 +10,21 @@ See image below showing gazebo and rviz visualisation.
 
 ### Turtlebot PDDL domain
 
-The PDDL domain definition can be found under `rosplan_turtlebot3_demo` package -> `common/domain_turtlebot_demo.pddl`:
+The PDDL domain definition of this demo can be accessed by doing:
 
 ```
-roscd rosplan_turtlebot3_demo/common
-cat domain_turtlebot_demo.pddl
+roscat rosplan_turtlebot3_demo domain_turtlebot_demo.pddl
+rosed rosplan_turtlebot3_demo domain_turtlebot_demo.pddl
 ```
 
-### Installation instructions
+## Installation instructions
 
-The demo requires that you install turtlebot 3 gazebo simulator and some other ros debian pkgs, you can do so by executing the following commands:
-
-```
-sudo apt install ros-melodic-turtlebot3-gazebo ros-melodic-turtlebot3-navigation ros-melodic-move-base-msgs ros-melodic-dwa-local-planner
-```
-
-Install further dependencies from source in your catkin workspace:
+The demo requires that you install turtlebot 3 gazebo simulator and some other ros debian pkgs, this will be done later on using rosdep, for now setup only build dependencies.
 ```
 cd ~/rosplan_ws/src
-git clone https://github.com/clearpathrobotics/occupancy_grid_utils
+git clone https://github.com/KCL-Planning/ROSPlan.git
 git clone https://github.com/KCL-Planning/rosplan_demos.git
-```
-
-It might be the case that you experience troubles in melodic with tf2 invalid lookupTransform, as a workaround you can clone it from source
-```
-git clone https://github.com/ROBOTIS-GIT/turtlebot3.git
+git clone https://github.com/clearpathrobotics/occupancy_grid_utils
 ```
 
 Compile the code:
@@ -42,24 +32,17 @@ Compile the code:
 catkin build
 ```
 
+Source the ROSPlan workspace and install runtime dependencies:
+```
+rosdep install rosplan_turtlebot3_demo
+```
+
 Then source the ROSPlan workspace in two terminals.
 ```
 source ~/rosplan_ws/devel/setup.bash
 ```
 
-### Fix small bug in gazebo installation (if needed)
-
-According to this [issue](https://bitbucket.org/osrf/gazebo/issues/2607/error-restcc-205-during-startup-gazebo)
-
-You need to change ~/.ignition/fuel/config.yaml as following.
-
-    url: https://api.ignitionfuel.org
-
-to
-
-    url: https://api.ignitionrobotics.org
-
-### Run instructions
+## Run instructions
 
 *1.* Export the desired turtlebot 3 configuration, available options include: burger, waffle, waffle_pi, e.g.:
 ```
@@ -117,3 +100,32 @@ KCL: (/rosplan_plan_dispatcher) Feedback received [0, action enabled]
 ...
 ```
 NOTE: You might experience a rotating behavior on the robot (overshooting the local trajectory), this is a known issue, however it should make progress towards the goal and eventually reach the waypoints.
+
+## Troubleshoot
+
+### Gazebo Turtlebot 3, invalid lookupTransform tf2 error (melodic)
+
+If you experience trouble with melodic regarding a tf2 invalid lookupTransform, as a workaround you can clone it from source:
+```
+git clone https://github.com/ROBOTIS-GIT/turtlebot3.git
+```
+
+### Fix small bug in gazebo installation (if needed)
+
+If you get this error in terminal while launching Gazebo turtlebot 3 simulation:
+
+```
+[Err] [REST.cc:205] Error in REST request
+```
+
+There is a fix in [here](https://bitbucket.org/osrf/gazebo/issues/2607/error-restcc-205-during-startup-gazebo)
+
+Just change ~/.ignition/fuel/config.yaml as following.
+
+Look for the line that says:
+
+    url: https://api.ignitionfuel.org
+
+replace it with:
+
+    url: https://api.ignitionrobotics.org

@@ -13,5 +13,9 @@
   <author email="oscar.lima@dfki.de">Oscar Lima</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>turtlebot3_gazebo</run_depend>
+  <run_depend>turtlebot3_navigation</run_depend>
+  <run_depend>dwa_local_planner</run_depend>
+  <run_depend>move_base_msgs</run_depend>
 
 </package>
