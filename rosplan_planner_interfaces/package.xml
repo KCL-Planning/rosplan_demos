@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rosplan_planner_interfaces</name>
+  <version>1.0.0</version>
+  <description>rosplan_planner_interfaces repository with example launch files to use planner_interfaces</description>
+
+  <maintainer email="tom.creutz@dfki.de">Tom Creutz</maintainer>
+
+  <license>BSD</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+
+  </export>
+</package>
