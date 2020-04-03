@@ -26,9 +26,10 @@ turtlebot 2 (kinetic only)
 sudo apt install ros-kinetic-turtlebot-gazebo ros-kinetic-turtlebot-navigation ros-kinetic-move-base-msgs
 ```
 
-Install further dependencies from source in your catkin workspace:
+Install [ROSPlan](https://github.com/kcl-planning/ROSPlan) and further dependencies from source in your catkin workspace:
 ```
 cd ~/rosplan_ws/src
+git clone https://github.com/KCL-Planning/ROSPlan.git
 git clone https://github.com/clearpathrobotics/occupancy_grid_utils
 git clone https://github.com/KCL-Planning/rosplan_demos.git
 ```
