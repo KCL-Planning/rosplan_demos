@@ -52,7 +52,7 @@ Then source the ROSPlan workspace in two terminals.
 source ~/rosplan_ws/devel/setup.bash
 ```
 
-# New : Installation instructions (ubuntu 18.04 + melodic from source)
+## New : Installation instructions (ubuntu 18.04 + melodic from source)
 
 Install debian pkgs:
 
