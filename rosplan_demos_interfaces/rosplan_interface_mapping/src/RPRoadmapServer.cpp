@@ -1,19 +1,19 @@
 /**
- * 
+ *
  * Copyright [2019] <KCL King's College London>
- * 
+ *
  * Author: Michael Cashmore (michael.cashmore@kcl.ac.uk)
  * Maintainer: Michael Cashmore (michael.cashmore@kcl.ac.uk)
  * Maintainer: Oscar Lima (oscar.lima@dfki.de)
- * 
+ *
  * RPRoadmapServer class is used to generate N free collision waypoints from a costmap subscription
- * 
+ *
  * - Currently this works throught the nav_msgs/GetMap service.
  * - Waypoints are stored symbolically in the Knowledge Base.
  * - Waypoint coordinates are stored in the parameter server.
  * - Connectivity between waypoints is also computed.
  * - Loading existing waypoints from a file is supported.
- * 
+ *
  */
 
 #include "rosplan_interface_mapping/RPRoadmapServer.h"
@@ -409,13 +409,13 @@ namespace KCL_rosplan {
         ROS_INFO("KCL: (%s) Done", ros::this_node::getName().c_str());
         return true;
     }
-    
+
     bool RPRoadmapServer::uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist)
     {
         std::string param_key = wp_namespace_ + "/" +"edge/" +wpSource + "/" + wpSink;
         nh_.setParam(param_key, dist);
         return true;
-    }	
+    }
 
     void RPRoadmapServer::createPRM(nav_msgs::OccupancyGrid &map,
                 unsigned int nr_waypoints,
@@ -549,7 +549,7 @@ namespace KCL_rosplan {
         }
 
         nav_msgs::OccupancyGrid map;
-        
+
         // option 1: get map via service call from map server, srv name is "/static_map"
         if(use_static_map_) {
             ROS_INFO("KCL: (%s) Reading in map", ros::this_node::getName().c_str());
@@ -841,6 +841,15 @@ namespace KCL_rosplan {
         edge_marker.color.r = 0.0;
         edge_marker.color.g = 0.3;
         edge_marker.color.b = 1.0;
+
+        edge_marker.pose.position.x = 0.0;
+        edge_marker.pose.position.y = 0.0;
+        edge_marker.pose.position.z = 0.0;
+        edge_marker.pose.orientation.x = 0.0;
+        edge_marker.pose.orientation.y = 0.0;
+        edge_marker.pose.orientation.z = 0.0;
+        edge_marker.pose.orientation.w = 1.0;
+
         node_marker.id = 1;
 
         for (std::vector<Edge>::iterator eit=edges_.begin(); eit!=edges_.end(); ++eit) {
