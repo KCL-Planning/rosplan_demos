@@ -75,30 +75,6 @@ git clone https://github.com/turtlebot/turtlebot_apps.git
 git clone https://github.com/turtlebot/turtlebot_msgs.git
 ```
 
-## Solve bug in tf
-
-A couple of errors will appear constantly like:
-
-```
-Warning: Invalid argument "/camera_depth_frame" passed to canTransform argument source_frame in tf2 frame_ids cannot start with a '/' like: 
-         at line 134 in /tmp/binarydeb/ros-melodic-tf2-0.6.5/src/buffer_core.cpp
-[ERROR] [/move_base]: TF Exception that should never happen for sensor frame: , cloud frame: /camera_depth_frame, Invalid argument "/camera_depth_frame" passed to lookupTransform argument source_frame in tf2 frame_ids cannot start with a '/' like:
-```
-
-To fix this, edit the file ```turtlebot_world.launch``` of the pkg ```turtlebot_gazebo``` by doing:
-
-```rosed turtlebot_gazebo turtlebot_world.launch```
-
-and replace:
-
-```<param name="output_frame_id" value="/camera_depth_frame"/>```
-
-with
-
-```<param name="output_frame_id" value="camera_depth_frame"/>```
-
-This will make those errors go away.
-
 ## Run instructions
 
 *1.* In a first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the `rosplan_demos` package:
