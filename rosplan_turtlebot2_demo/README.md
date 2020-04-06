@@ -75,6 +75,16 @@ git clone https://github.com/turtlebot/turtlebot_apps.git
 git clone https://github.com/turtlebot/turtlebot_msgs.git
 ```
 
+Compile the code:
+```
+catkin build
+```
+
+Then source the ROSPlan workspace in two terminals.
+```
+source ~/rosplan_ws/devel/setup.bash
+```
+
 ## Run instructions
 
 *1.* In a first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the `rosplan_demos` package:
