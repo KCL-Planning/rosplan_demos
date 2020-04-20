@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import rosplan_interface_movebase_py.rosplan_interface_movebase
+
+if __name__ == '__main__':
+    rosplan_interface_movebase_py.rosplan_interface_movebase.main()

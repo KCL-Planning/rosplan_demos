@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- ROSPlan turtlebot3 demo with ROSPlan (using python move base action interface) -->
+
+    <!-- turning off gazebo gui can save resources if you have a slow computer -->
+    <arg name="gazebo_gui" default="true"/>
+
+    <!-- we reuse the demo from rosplan_turtlebot3_demo and tune it to use python interface -->
+    <include file="$(find rosplan_turtlebot3_demo)/launch/turtlebot.launch" >
+        <arg name="interface_type" value="rosplan_interface_movebase_py" />
+        <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
+    </include>
+
+</launch>

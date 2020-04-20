@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>rosplan_interface_movebase_py</name>
+  <version>1.0.0</version>
+  <description>
+    Python version of rosplan_interface_movebase
+  </description>
+
+  <license>BSD</license>
+
+  <author email="oscar.lima@dfki.de">Oscar Lima</author>
+  <maintainer email="oscar.lima@dfki.de">Oscar Lima</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>rosplan_planning_system</run_depend>
+
+</package>

@@ -6,6 +6,9 @@
     <arg name="map_file" default="$(find rosplan_turtlebot3_demo)/maps/playground.yaml"/>
     <arg name="gazebo_gui" default="true"/>
 
+    <!-- select between a python or a c++ rosplan move base interface (default: C++) -->
+    <arg name="interface_type" default="rosplan_interface_movebase"/> <!-- python alternative: rosplan_interface_movebase_py -->
+
     <!-- turtlebot3 simulation -->
     <include file="$(find rosplan_turtlebot3_demo)/launch/turtlebot3_bringup_sim.launch" >
         <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
@@ -33,7 +36,7 @@
     </include>
 
     <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
-    <node pkg="rosplan_interface_movebase" type="rpmovebase" name="rosplan_interface_movebase" respawn="false" output="screen">
+    <node pkg="$(arg interface_type)" type="rpmovebase" name="rosplan_interface_movebase" respawn="false" output="screen">
         <param name="knowledge_base" value="rosplan_knowledge_base" />
         <param name="action_server" value="/move_base" />
         <param name="pddl_action_name" value="goto_waypoint" />
