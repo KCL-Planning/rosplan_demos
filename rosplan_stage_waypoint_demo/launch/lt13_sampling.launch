@@ -95,6 +95,8 @@
             <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
             <param name="costmap_topic"       value="/costmap" />
             <param name="hppits_topic"        value="/hppits_map" />
+            <param name="generate_best_waypoints"  value="true" />
+
 
             <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
             <param name="minimum_sample_separation" value="1.6" />
