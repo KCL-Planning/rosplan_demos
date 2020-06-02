@@ -29,7 +29,9 @@ generate_messages(
   geometry_msgs
 )
 
-catkin_package()
+catkin_package(INCLUDE_DIRS include LIBRARIES ${PROJECT_NAME})
+add_library(${PROJECT_NAME} src/RPRoadmapServer.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 ###########
 ## Build ##
@@ -44,6 +46,9 @@ include_directories(
 add_executable(rp_roadmap_server src/RPRoadmapServer.cpp)
 add_dependencies(rp_roadmap_server rosplan_interface_mapping_generate_messages_cpp)
 target_link_libraries(rp_roadmap_server ${catkin_LIBRARIES})
+
+
+
 
 ##########
 ## Test ##

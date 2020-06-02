@@ -1,0 +1,17 @@
+digraph plan {
+0[ label="plan_start",style=filled,fillcolor=black,fontcolor=white];
+1[ label="goto_waypoint_start
+(kenny,wp0,wp7)",style=filled,fillcolor=darkolivegreen,fontcolor=white];
+2[ label="goto_waypoint_end
+(kenny,wp0,wp7)",style=filled,fillcolor=darkolivegreen,fontcolor=white];
+3[ label="inspect_doughnut_start
+(kenny,wp7,dougnut_1,order_0)",style=filled,fillcolor=darkolivegreen,fontcolor=white];
+4[ label="inspect_doughnut_end
+(kenny,wp7,dougnut_1,order_0)",style=filled,fillcolor=darkolivegreen,fontcolor=white];
+"0" -> "1" [ label="[0.001, inf]" , penwidth=2, color="black"]
+"1" -> "2" [ label="[8.059, 8.059]" , penwidth=2, color="black"]
+"0" -> "2" [ label="[0.001, inf]" , penwidth=2, color="black"]
+"2" -> "3" [ label="[0.001, inf]" , penwidth=2, color="black"]
+"3" -> "4" [ label="[5, 5]" , penwidth=2, color="black"]
+"0" -> "4" [ label="[0.001, inf]" , penwidth=2, color="black"]
+}
