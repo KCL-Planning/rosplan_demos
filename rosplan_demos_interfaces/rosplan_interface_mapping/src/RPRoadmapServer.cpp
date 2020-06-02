@@ -552,7 +552,7 @@ namespace KCL_rosplan {
 	   // Move the waypoint closer so it's no further than @ref{casting_distance} away from the casting_wp.
             wp->update(*casting_wp, casting_distance, map.info);
 
-            if(map.data[y*width+x] > occupancy_threshold) {
+            if(map.data[wp->grid_x + wp->grid_y * map.info.width] > occupancy_threshold) {
                 delete wp;
 		return NULL;
             }

@@ -220,7 +220,6 @@ namespace KCL_rosplan {
         * @choose wp to cast new edge to
         * @return newly created waypoint
         */
-	 //TODO SARAH - verify this before pushing
         virtual Waypoint* castNewWP(Waypoint* casting_wp, double casting_distance, double occupancy_threshold, const nav_msgs::OccupancyGrid &map);
 
         /// visualisation functions
