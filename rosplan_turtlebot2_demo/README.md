@@ -1,6 +1,14 @@
-# Exploration demo with turtlebot 2 and Gazebo simulator (kinetic only!)
+# Exploration demo with turtlebot 2 and Gazebo simulator
 
-### Demo brief description
+This demo will work "out of the box" using mostly debian pkgs under ubuntu 16.04 + kinetic.
+
+For ubuntu 18.04 users we recommend to visit the [turtlebot 3 demo](https://github.com/KCL-Planning/rosplan_demos/tree/master/rosplan_turtlebot3_demo),
+
+however if you really wish to try turtlebot 2 gazebo demo under ubuntu 18.04 + melodic we present instructions on
+
+how to do this by cloning the code from source.
+
+## Demo brief description
 
 The turtlebot demo is a simple exploration mission. The robot will visit randomly generated waypoints around a map.
 
@@ -8,7 +16,7 @@ See image below showing rviz visualisation.
 
 ![](doc/turtle_demo.png?raw=true)
 
-### Turtlebot PDDL domain
+## Turtlebot PDDL domain
 
 The PDDL domain definition can be found under `rosplan_turtlebot2_demo` package -> `common/domain_turtlebot_demo.pddl`:
 
@@ -17,7 +25,7 @@ roscd rosplan_turtlebot2_demo/common
 cat domain_turtlebot_demo.pddl
 ```
 
-### Installation instructions
+## Installation instructions (ubuntu 16.04 + kinetic)
 
 The demo requires that you install turtlebot gazebo simulator, you can do so by executing the following commands:
 
@@ -26,9 +34,10 @@ turtlebot 2 (kinetic only)
 sudo apt install ros-kinetic-turtlebot-gazebo ros-kinetic-turtlebot-navigation ros-kinetic-move-base-msgs
 ```
 
-Install further dependencies from source in your catkin workspace:
+Install [ROSPlan](https://github.com/kcl-planning/ROSPlan) and further dependencies from source in your catkin workspace:
 ```
 cd ~/rosplan_ws/src
+git clone https://github.com/KCL-Planning/ROSPlan.git
 git clone https://github.com/clearpathrobotics/occupancy_grid_utils
 git clone https://github.com/KCL-Planning/rosplan_demos.git
 ```
@@ -43,7 +52,40 @@ Then source the ROSPlan workspace in two terminals.
 source ~/rosplan_ws/devel/setup.bash
 ```
 
-### Run instructions
+## New : Installation instructions (ubuntu 18.04 + melodic from source)
+
+Install debian pkgs:
+
+```
+sudo apt install ros-melodic-kobuki-msgs ros-melodic-ecl-exceptions ros-melodic-ecl-threads
+ros-melodic-ecl-geometry ros-melodic-kobuki-dock-drive ros-melodic-yocs-controllers
+ros-melodic-kobuki-driver ros-melodic-ecl-streams ros-melodic-yocs-velocity-smoother
+ros-melodic-depthimage-to-laserscan ros-melodic-yocs-cmd-vel-mux ros-melodic-gazebo-plugins pyqt5-dev-tools
+```
+
+clone turtlebot 2 repos:
+
+```
+git clone --branch melodic https://github.com/yujinrobot/kobuki.git
+git clone https://github.com/yujinrobot/kobuki_msgs.git
+git clone https://github.com/yujinrobot/kobuki_desktop.git
+git clone https://github.com/turtlebot/turtlebot.git
+git clone https://github.com/turtlebot/turtlebot_simulator.git
+git clone https://github.com/turtlebot/turtlebot_apps.git
+git clone https://github.com/turtlebot/turtlebot_msgs.git
+```
+
+Compile the code:
+```
+catkin build
+```
+
+Then source the ROSPlan workspace in two terminals.
+```
+source ~/rosplan_ws/devel/setup.bash
+```
+
+## Run instructions
 
 *1.* In a first terminal, begin the simulation, rviz visualisation, and ROSPlan nodes using the `turtlebot.launch` from the `rosplan_demos` package:
 ```
@@ -84,7 +126,7 @@ KCL: (/rosplan_problem_interface) (problem.pddl) Generating problem file.
 KCL: (/rosplan_problem_interface) (problem.pddl) The problem was generated.
 KCL: (/rosplan_planner_interface) Problem received.
 KCL: (/rosplan_planner_interface) (problem.pddl) Writing problem to file.
-KCL: (/rosplan_planner_interface) (problem.pddl) Running: timeout 10 /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_planning_system/common/bin/popf /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/domain_turtlebot_demo.pddl /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/problem.pddl > /home/michael/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/plan.pddl
+KCL: (/rosplan_planner_interface) (problem.pddl) Running: timeout 10 /home/user/ros_indigo/turtlebot/src/rosplan/rosplan_planning_system/common/bin/popf /home/user/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/domain_turtlebot_demo.pddl /home/user/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/problem.pddl > /home/user/ros_indigo/turtlebot/src/rosplan/rosplan_demos/common/plan.pddl
 KCL: (/rosplan_planner_interface) (problem.pddl) Planning complete
 KCL: (/rosplan_planner_interface) (problem.pddl) Plan was solved.
 KCL: (/rosplan_parsing_interface) Planner output received.
