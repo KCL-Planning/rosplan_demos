@@ -7,7 +7,7 @@ Panels:
         - /localisation1/LaserScan1
         - /Waypoints1
         - /Waypoints1/WPs1
-        - /Maps1/Map1
+        - /Maps1
         - /Map1
       Splitter Ratio: 0.5055555701255798
     Tree Height: 724
@@ -219,7 +219,7 @@ Visualization Manager:
           Marker Topic: /rosplan_roadmap_server/viz/waypoints
           Name: WPs
           Namespaces:
-            {}
+            /rosplan_demo_waypoints: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -227,7 +227,7 @@ Visualization Manager:
           Marker Topic: /rosplan_roadmap_server/viz/edges
           Name: Edges
           Namespaces:
-            {}
+            /rosplan_demo_waypoints: true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -251,7 +251,7 @@ Visualization Manager:
           Marker Topic: /doughnut_visible_from
           Name: PedestalVisibility
           Namespaces:
-            {}
+            "": true
           Queue Size: 1
           Value: true
       Enabled: true
@@ -262,12 +262,12 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: true
-          Enabled: true
+          Enabled: false
           Name: Map
           Topic: /costmap
           Unreliable: false
           Use Timestamp: false
-          Value: true
+          Value: false
         - Alpha: 0.4000000059604645
           Class: rviz/Map
           Color Scheme: map
@@ -307,7 +307,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /prefs_map
+      Topic: /merged_map
       Unreliable: false
       Use Timestamp: false
       Value: true

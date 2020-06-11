@@ -2,7 +2,7 @@
 <launch>
 
     <!-- Important Experiment Arguments -->
-    <arg name="approach"         default="0" />
+    <arg name="sampling_approach"         default="0" />
     <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
     <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_20doughnuts_variant00.yaml" />
@@ -33,8 +33,8 @@
     <!-- probabilistic roadmap generation -->
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
         <arg name="use_static_map"      value="true" />
-        <arg name="update_waypoints"    value="$(eval arg('approach')==1)" />
-        <arg name="update_connectivity" value="$(eval arg('approach')==1)" />
+        <arg name="update_waypoints"    value="$(eval arg('sampling_approach')==1)" />
+        <arg name="update_connectivity" value="$(eval arg('sampling_approach')==1)" />
         <arg name="wp_reference_frame"  value="/map" />
         <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
         <arg name="costmap_topic"       value="/costmap" />
@@ -57,11 +57,11 @@
         <rosparam file="$(arg objects_file)" command="load" />
         <param name="main_rate"  value="10" />
         <!-- override the waypoint namespace to use the PRM waypoints -->
-        <param name="waypoint_namespace"  value="/rosplan_demo_waypoints/wp" if="$(eval arg('approach')==1)"/>
+        <param name="waypoint_namespace"  value="/rosplan_demo_waypoints/wp" if="$(eval arg('sampling_approach')==1)"/>
     </node>
 
     <!-- APPROACH 0: task-aware waypoint sampling -->
-    <group if="$(eval arg('approach')==0)">
+    <group if="$(eval arg('sampling_approach')==0)">
         <!-- waypoint filtering node (roadmap) -->
         <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_roadmap_filter" output="screen">
             <param name="srv_timeout"         value="6" />
@@ -83,7 +83,7 @@
     </group>
 
     <!-- APPROACH 2: fixed waypoint approach -->
-    <group if="$(eval arg('approach')==2)">
+    <group if="$(eval arg('sampling_approach')==2)">
     
         <!-- fixed waypoint generation node (1 per object) (roadmap) -->
         <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_fixed_wp_gen" output="screen">
@@ -123,6 +123,6 @@
         <param name="results_path"           value="$(find rosplan_stage_waypoint_demo)/pddl/results.csv" />
         <param name="initial_state"          value="$(arg initial_state)" />
         <param name="planner_command"        value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
-        <param name="approach"               value="$(arg approach)" />
+        <param name="sampling_approach"               value="$(arg sampling_approach)" />
     </node>
 </launch>

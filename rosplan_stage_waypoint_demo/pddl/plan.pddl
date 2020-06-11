@@ -1,7 +1,9 @@
-Number of literals: 63
+Number of literals: 35
 Constructing lookup tables: [10%] [20%] [30%] [40%] [50%] [60%] [70%] [80%] [90%] [100%]
 Post filtering unreachable actions:  [10%] [20%] [30%] [40%] [50%] [60%] [70%] [80%] [90%] [100%]
 Have identified that bigger values of (order_complete order_0) are preferable
-[01;34mNo analytic limits found, not considering limit effects of goal-only operators[00m
-All the ground actions in this problem are compression-safe
-Initial heuristic = 3.000
+Recognised a monotonic-change-induced limit on var0(order_complete order_0)
+- Must be >= 6.000
+Initial heuristic = -1.000
+;; Problem unsolvable!
+; Time 0.00
