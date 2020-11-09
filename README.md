@@ -4,6 +4,29 @@
 
 Each demo package contains a README with description and instructions for both installation and running.
 
+# Installation
+
+This repository contains demos for [ROSPlan](https://github.com/KCL-Planning/rosplan)
+
+First, you must install ROSPlan on your system. Please refer to the [ROSPlan installation instructions](https://github.com/KCL-Planning/ROSPlan/blob/master/README.md#installation).
+
+Additionally, in order to succesfully compile this repository, please do:
+
+    sudo apt install ros-$ROS_DISTRO-tf2-bullet
+
+For ROS noetic:
+
+    git clone --branch noetic-devel git@github.com:galou/occupancy_grid_utils.git
+
+For ROS melodic:
+
+    git clone git@github.com:clearpathrobotics/occupancy_grid_utils.git
+
+Build
+
+    cd <your catkin workspace>
+    catkin build
+
 ### Stage Demos
 
 - **Stage Demo** [*rosplan_stage_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_stage_demo) (melodic)  
@@ -19,7 +42,12 @@ This demonstrates [ROB-IS](https://github.com/sarah-keren/ROB-IS) and builds upo
 <p align="center"><img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_stage_waypoint_demo/rosplan_waypoint_demo.png" width="25%"></p>
 
 ### Gazebo Demos
+
 - **Turtlebot2 Exploration** [*rosplan_turtlebot2_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot2_demo) (kinetic)  
 This demo is a simple exploration mission. The robot visits randomly generated waypoints around a map.
-- **Turtlebot3 Exploration** [*rosplan_turtlebot3_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo) (melodic)  
+<p align="center"><img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot2_demo/doc/turtle_demo.png" width="50%"></p>
+
+- **Turtlebot3 Exploration** [*rosplan_turtlebot3_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo) (melodic, noetic)
 This demo is a simple exploration mission. The robot visits randomly generated waypoints around a map.
+<p align="center"><img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo/doc/turtle_demo_gazebo.jpg" width="25%" height="25%">
+                  <img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo/doc/turtle_demo.png" width="25%" height="25%"></p>
