@@ -2,16 +2,21 @@
 
 ![Build status](https://github.com/KCL-Planning/rosplan_demos/workflows/build/badge.svg)
 
-Each demo package contains a README with description and instructions for both installation and running.
-
-# Installation
-
 This repository contains demos for [ROSPlan](https://github.com/KCL-Planning/rosplan).
+
+Each demo package contains a README with description and instructions for both demo specific installation and running.
+
+The installation instructions below will allow you to succesfully build all ros packages provided in this repository.
+
+### Installation
+
 Please refer to the [ROSPlan installation instructions](https://github.com/KCL-Planning/ROSPlan/blob/master/README.md#installation) before proceeding.
 
-Additionally, in order to succesfully compile this repository, please do:
+Install dependencies from binaries:
 
     sudo apt install ros-$ROS_DISTRO-tf2-bullet
+
+Install dependencies from source:
 
 For ROS noetic:
 
