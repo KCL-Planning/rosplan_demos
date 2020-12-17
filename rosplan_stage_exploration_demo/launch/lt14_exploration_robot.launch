@@ -8,26 +8,7 @@
     <arg name="autom_gen_problem_path" default="$(find rosplan_stage_exploration_demo)/pddl/generated_problem.pddl" />
 
     <!-- Arguments -->
-    <arg name="model"             default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
-    <arg name="map_file"          default="$(find rosplan_stage_demo)/maps/simple_house.yaml"/>
-    <arg name="world_file"        default="$(find rosplan_stage_demo)/world/simple_house.world"/>
-    <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
-    <arg name="local_param_file"  default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
-    <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
     <arg name="max_prm_size"      default="80" />
-
-    <!-- base stage demo -->
-    <include file="$(find rosplan_stage_demo)/launch/empty_stage_no_rviz.launch" >
-        <arg name="model"             value="$(arg model)" />
-        <arg name="map_file"          value="$(arg map_file)"/>
-        <arg name="world_file"        value="$(arg world_file)"/>
-        <arg name="common_param_file" value="$(arg common_param_file)"/>
-        <arg name="local_param_file"  value="$(arg local_param_file)"/>
-        <arg name="global_param_file" value="$(arg global_param_file)"/>
-    </include>
-
-    <!-- visualisation of robot sensor data -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_exploration_demo)/config/exploration.rviz" />
 
     <!-- probabilistic roadmap generation -->
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
@@ -73,14 +54,5 @@
         <param name="domain_path"     value="$(arg domain_path)" />
         <param name="problem_path"    value="$(arg autom_gen_problem_path)" />
         <param name="data_path"       value="$(arg data_path)" />
-    </node>
-
-    <!-- graph saver -->
-    <node pkg="rosplan_stage_exploration_demo" type="graph_saver.py" name="graph_saver" respawn="false" output="screen">
-        <param name="data_path" value="$(find rosplan_stage_exploration_demo)/pddl/exploration_plan.dot" />
-    </node>
-
-    <!-- graph saver -->
-    <node pkg="rosplan_rqt" type="esterel_plan_viewer.py" name="esterel_plan_viewer" respawn="false" output="screen">
     </node>
 </launch>

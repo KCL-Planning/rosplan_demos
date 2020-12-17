@@ -72,6 +72,8 @@ def execute_plan():
         rospy.logerr("KCL: (%s) The plan was not parsed!" % rospy.get_name())
         return
 
+    rospy.sleep(3)
+
     rospy.loginfo("KCL: (%s) Calling plan execution" % rospy.get_name())
     pd = rospy.ServiceProxy('/rosplan_plan_dispatcher/dispatch_plan', DispatchService)
     pd_response = pd()
@@ -93,12 +95,29 @@ try:
     rospy.sleep(1)
 
     # add goals to the KB
-    for i in range(1):
+    for i in range(3):
         wp_goal = random.randint(0,max_prm_size-1)
         kus = KnowledgeUpdateServiceRequest()
         kus.update_type = 1
         kus.knowledge.knowledge_type = 1
         kus.knowledge.attribute_name = 'visited'
+        kv = KeyValue()
+        kv.key = 'wp'
+        kv.value = 'wp'+str(wp_goal)
+        kus.knowledge.values.append(kv)
+        kuc = rospy.ServiceProxy('/rosplan_knowledge_base/update', KnowledgeUpdateService)
+        if not kuc(kus):
+            rospy.logerr("KCL: (%s) Goal was not added!" % rospy.get_name())
+
+        wp_goal = 0
+        kus = KnowledgeUpdateServiceRequest()
+        kus.update_type = 1
+        kus.knowledge.knowledge_type = 1
+        kus.knowledge.attribute_name = 'robot_at'
+        kv = KeyValue()
+        kv.key = 'v'
+        kv.value = 'kenny'
+        kus.knowledge.values.append(kv)
         kv = KeyValue()
         kv.key = 'wp'
         kv.value = 'wp'+str(wp_goal)

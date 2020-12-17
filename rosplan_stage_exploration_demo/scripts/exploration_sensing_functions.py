@@ -2,13 +2,14 @@
 import numpy as np
 from math import sqrt
 
-def robot_at(msg, params): # Idea: Params are the instances of all the parameters in a dictionary and the messaestoreproxy
+def robot_at(msg, params):
 
     assert(msg.header.frame_id == "map")
     assert(len(params) == 2)
     ret_value = []
     attributes = get_kb_attribute("robot_at")
     curr_wp = ''
+
     # Find current robot_location
     for a in attributes:
         if not a.is_negative:
