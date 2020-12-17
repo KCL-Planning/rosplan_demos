@@ -23,7 +23,7 @@ The demo launches a Stage simulation with the following components:
 
 Fetch the required dependencies:
 ```
-sudo apt install ros-${ROS_DISTRO}-turtlebot3-navigation ros-${ROS_DISTRO}-move-base-msgs ros-${ROS_DISTRO}-dwa-local-planner and ros-${ROS_DISTRO}-dwa-local-planner
+sudo apt install ros-${ROS_DISTRO}-turtlebot3-navigation ros-${ROS_DISTRO}-move-base-msgs ros-${ROS_DISTRO}-dwa-local-planner
 ```
 
 Install all the required packages in your catkin workspace:

@@ -1,6 +1,6 @@
 # rosplan_demos
 
-[![Build Status](https://travis-ci.com/KCL-Planning/rosplan_demos.svg?branch=master)](https://travis-ci.com/KCL-Planning/rosplan_demos)
+![Build status](https://github.com/KCL-Planning/rosplan_demos/workflows/build/badge.svg)
 
 Each demo package contains a README with description and instructions for both installation and running.
 
@@ -19,7 +19,7 @@ This demonstrates [ROB-IS](https://github.com/sarah-keren/ROB-IS) and builds upo
 <p align="center"><img src="https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_stage_waypoint_demo/rosplan_waypoint_demo.png" width="25%"></p>
 
 ### Gazebo Demos
-- **Turtlebot2 Exploration** [*rosplan_turtlebot2_demo*](tree/master/rosplan_turtlebot2_demo) (kinetic)  
+- **Turtlebot2 Exploration** [*rosplan_turtlebot2_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot2_demo) (kinetic)  
 This demo is a simple exploration mission. The robot visits randomly generated waypoints around a map.
-- **Turtlebot2 Exploration** [*rosplan_turtlebot3_demo*](tree/master/rosplan_turtlebot3_demo) (melodic)  
+- **Turtlebot3 Exploration** [*rosplan_turtlebot3_demo*](https://github.com/KCL-Planning/rosplan_demos/blob/master/rosplan_turtlebot3_demo) (melodic)  
 This demo is a simple exploration mission. The robot visits randomly generated waypoints around a map.

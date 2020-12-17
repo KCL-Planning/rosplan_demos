@@ -1,0 +1,29 @@
+name: build
+
+on: [push, pull_request]
+
+env:
+  ROS_VERSION: melodic
+  HOME: /root/ws
+  USER: root
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    container:
+      image: kclplanning/rosplan
+    steps:
+      - name: "Checkout source"
+        uses: actions/checkout@v2
+        with:
+          path: src/rosplan_demos
+      - name: Install dependencies
+        run: |
+          source /opt/ros/$ROS_VERSION/setup.bash
+          cd $HOME
+          source devel/setup.bash
+          rosdep update
+          rosdep install --from-paths src --ignore-src -q -r -y
+        shell: bash
+      - name: Build workspace
+        run: catkin build --summarize --workspace $HOME # --no-status
+
