@@ -94,7 +94,7 @@
             <param name="wp_namespace_output" value="/task_planning_waypoints" />
             <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
             <param name="costmap_topic"       value="/costmap" />
-            <param name="hppits_topic"        value="/hppits_map" />
+            <param name="prefs_topic"        value="/prefs_map" />
             <param name="generate_best_waypoints"  value="true" />
 
 
