@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<launch>
+
+    <param name="/use_sim_time" value="true"/>
+
+    <!-- PDDL Arguments -->
+    <arg name="domain_path"  default="$(find rosplan_stage_exploration_demo_multirobot)/pddl/domain_turtlebot_demo.pddl" />
+    <arg name="initial_state" default="$(find rosplan_stage_exploration_demo_multirobot)/pddl/problem_turtlebot_demo.pddl" />
+    <arg name="data_path"    default="$(find rosplan_stage_exploration_demo_multirobot)/pddl/" />
+    <arg name="autom_gen_problem_path" default="$(find rosplan_stage_exploration_demo_multirobot)/pddl/generated_problem.pddl" />
+
+    <!-- Arguments -->
+    <arg name="model"             default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="map_file"          default="$(find rosplan_stage_demo)/maps/simple_house.yaml"/>
+    <arg name="world_file"        default="$(find rosplan_stage_demo)/world/simple_house_2robots.world"/>
+    <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
+    <arg name="local_param_file"  default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
+    <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
+    <arg name="max_prm_size"      default="80" />
+
+    <arg name="robot_name_1" default="robot_0" />
+    <arg name="robot_name_2" default="robot_1" />
+    <arg name="waypoints" default='0' />
+
+    <!-- stage simulation -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(arg world_file)" respawn="false" output="log" />
+
+    <!-- visualisation of robot sensor data -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_exploration_demo_multirobot)/config/exploration.rviz" />
+
+    <!-- Map server -->
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <!-- ROBOT 0 -->
+    <group ns="$(arg robot_name_1)">
+        <param name="tf_prefix" value="$(arg robot_name_1)" />
+
+        <include file="$(find rosplan_stage_exploration_demo_multirobot)/launch/robot.launch">
+            <arg name="tf_prefix" value="$(arg robot_name_1)" />
+            <arg name="namespace" value="$(arg robot_name_1)"/>
+            <arg name="initial_pose_x" value="6.525"/>
+            <arg name="initial_pose_y" value="4.375"/>
+            <arg name="initial_pose_a" value="0.000"/>
+            <arg name="model" value="$(arg model)"/>
+        </include>
+    </group>
+
+    <!-- ROBOT 1 -->
+    <group ns="$(arg robot_name_2)">
+        <param name="tf_prefix" value="$(arg robot_name_2)" />
+
+        <include file="$(find rosplan_stage_exploration_demo_multirobot)/launch/robot.launch">
+            <arg name="tf_prefix" value="$(arg robot_name_2)" />
+            <arg name="namespace" value="$(arg robot_name_2)"/>
+            <arg name="initial_pose_x" value="6.525"/>
+            <arg name="initial_pose_y" value="8.375"/>
+            <arg name="initial_pose_a" value="0.000"/>
+            <arg name="model" value="$(arg model)"/>
+        </include>
+    </group>
+      
+
+    <!-- probabilistic roadmap generation -->
+    <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
+        <arg name="use_static_map"      value="false" />
+        <arg name="update_waypoints"    value="true" />
+        <arg name="update_connectivity" value="false" />
+        <arg name="wp_reference_frame"  value="/map" />
+        <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
+        <arg name="costmap_topic"       value="/robot_0/move_base/global_costmap/costmap" />
+        <arg name="odom_topic"          value="/robot_0/odom" />
+    </include>
+
+    <!-- ROSPlan -->
+    <include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
+        <arg name="domain_path" value="$(arg domain_path)" />
+        <!-- load a particular initial state into KB at startup (optional) -->
+        <arg name="problem_path" value="$(arg initial_state)" />
+        <!-- automatically generated pddl problem will be created here -->
+        <arg name="autom_gen_problem_path" value="$(arg autom_gen_problem_path)" />
+        <!-- planner will produce output plan and write to this location -->
+        <arg name="data_path" value="$(arg data_path)" />
+    </include>
+
+    <!-- rosplan sensing interface -->
+    <node name="rosplan_sensing_interface" pkg="rosplan_sensing_interface" type="sensing_interface.py" respawn="false" output="screen">
+        <rosparam command="load" file="$(find rosplan_stage_exploration_demo_multirobot)/config/sensing_config.yaml" />
+        <param name="main_rate"  value="10" />
+    </node>
+
+    <!-- ActionInterfaceManager -->
+    <node name="rosplan_action_interface" pkg="rosplan_action_interface" type="ActionInterfaceManager.py" respawn="false" output="screen">
+        <rosparam command="load" file="$(find rosplan_stage_exploration_demo_multirobot)/config/action_config.yaml" />
+        <param name="knowledge_base"        value="rosplan_knowledge_base" />
+        <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
+        <param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
+    </node>
+
+    <!-- main coordinator -->
+    <node pkg="rosplan_stage_exploration_demo_multirobot" type="main_executor.py" name="coordinator" respawn="false" required="false" output="screen">
+        <param name="max_prm_size"    value="$(arg max_prm_size)" />
+        <param name="planner_command" value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
+        <param name="domain_path"     value="$(arg domain_path)" />
+        <param name="problem_path"    value="$(arg autom_gen_problem_path)" />
+        <param name="data_path"       value="$(arg data_path)" />
+    </node>
+
+    <!-- plan graph visualisation -->
+    <node pkg="rosplan_rqt" type="esterel_plan_viewer.py" name="esterel_plan_viewer" respawn="false" output="screen" />
+    <node pkg="rosplan_stage_exploration_demo_multirobot" type="graph_saver.py" name="graph_saver" respawn="false" output="screen">
+        <param name="data_path" value="$(find rosplan_stage_exploration_demo_multirobot)/pddl/exploration_plan.dot" />
+    </node>
+</launch>

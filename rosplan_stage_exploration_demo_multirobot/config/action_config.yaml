@@ -1,0 +1,17 @@
+#====================================================#
+# This file contains action interface configurations #
+# for the multirobot rosplan stage exploration demo. #
+#====================================================#
+
+actions:
+    # goto_waypoint ?v - robot ?to waypoint
+    - name: goto_waypoint
+      interface_type: actionlib
+      default_actionlib_topic: /($pddlparam v)/move_base
+      default_actionlib_msg_type: move_base_msgs/MoveBase
+      default_actionlib_goal:
+          target_pose.header.frame_id: "map"
+          target_pose.pose.position.x: ($rosparam /rosplan_demo_waypoints/wp/($pddlparam to))[0]
+          target_pose.pose.position.y: ($rosparam /rosplan_demo_waypoints/wp/($pddlparam to))[1]
+          target_pose.pose.orientation.w: 1
+
