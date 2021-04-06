@@ -93,7 +93,7 @@ try:
     rospy.sleep(3)
     make_prm(max_prm_size)
 
-    # wait for odom to publish to sensing interface TODO finish
+    # wait for odom to publish to sensing interface
     sps = rospy.ServiceProxy('/rosplan_knowledge_base/state/propositions', GetAttributeService)    
     count = 0
     while count<2:
@@ -102,7 +102,7 @@ try:
         gas.predicate_name = 'robot_at'
         facts = sps(gas)
         if not facts:
-            rospy.logwarn("KCL: (%s) Poposition service not available." % rospy.get_name())
+            rospy.logwarn("KCL: (%s) Proposition service not available." % rospy.get_name())
         count = 0
         for k in facts.attributes:
             if not k.is_negative:

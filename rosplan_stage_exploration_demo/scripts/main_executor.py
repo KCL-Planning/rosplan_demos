@@ -90,9 +90,23 @@ def execute_plan():
 
 ### execute visit all ####
 try:
-    rospy.sleep(5)
+    rospy.sleep(3)
     make_prm(max_prm_size)
-    rospy.sleep(1)
+
+    # wait for odom to publish to sensing interface
+    sps = rospy.ServiceProxy('/rosplan_knowledge_base/state/propositions', GetAttributeService)    
+    count = 0
+    while count<1:
+        rospy.sleep(1)
+        gas = GetAttributeServiceRequest()    
+        gas.predicate_name = 'robot_at'
+        facts = sps(gas)
+        if not facts:
+            rospy.logwarn("KCL: (%s) Proposition service not available." % rospy.get_name())
+        count = 0
+        for k in facts.attributes:
+            if not k.is_negative:
+                count = count + 1
 
     # add goals to the KB
     for i in range(3):
@@ -101,23 +115,6 @@ try:
         kus.update_type = 1
         kus.knowledge.knowledge_type = 1
         kus.knowledge.attribute_name = 'visited'
-        kv = KeyValue()
-        kv.key = 'wp'
-        kv.value = 'wp'+str(wp_goal)
-        kus.knowledge.values.append(kv)
-        kuc = rospy.ServiceProxy('/rosplan_knowledge_base/update', KnowledgeUpdateService)
-        if not kuc(kus):
-            rospy.logerr("KCL: (%s) Goal was not added!" % rospy.get_name())
-
-        wp_goal = 0
-        kus = KnowledgeUpdateServiceRequest()
-        kus.update_type = 1
-        kus.knowledge.knowledge_type = 1
-        kus.knowledge.attribute_name = 'robot_at'
-        kv = KeyValue()
-        kv.key = 'v'
-        kv.value = 'kenny'
-        kus.knowledge.values.append(kv)
         kv = KeyValue()
         kv.key = 'wp'
         kv.value = 'wp'+str(wp_goal)
