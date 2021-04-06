@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="tf_prefix" />
+    <arg name="namespace" default="default_namespace"/>
+    <arg name="initial_pose_x" default="0"/>
+    <arg name="initial_pose_y" default="0"/>
+    <arg name="initial_pose_a" default="0"/>
+
+    <arg name="model"             default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
+    <arg name="local_param_file"  default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
+    <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
+
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+        <arg name="model" value="$(arg model)" />
+        <arg name="multi_robot_name" value="$(arg namespace)" />
+    </include>
+
+    <!-- move_base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log">
+
+        <param name="tf_prefix"                 value="$(arg tf_prefix)"/>
+
+        <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load" />
+
+        <rosparam file="$(arg common_param_file)" command="load" ns="global_costmap" />
+        <rosparam file="$(arg local_param_file)" command="load" />
+        <rosparam file="$(arg global_param_file)" command="load" />
+
+        <param name="global_costmap/robot_base_frame" value="$(arg namespace)/base_footprint"/>
+        <param name="local_costmap/robot_base_frame" value="$(arg namespace)/base_footprint"/>
+        <param name="local_costmap/global_frame" value="$(arg namespace)/odom"/>
+        <param name="TrajectoryPlannerROS/holonomic_robot" value="false"/>
+
+        <remap from="map" to="/map" />
+    </node>
+
+
+    <!-- AMCL -->
+    <node pkg="amcl" type="amcl" name="amcl">
+
+        <param name="use_map_topic"             value="true"/>
+        <param name="tf_prefix"                 value="$(arg tf_prefix)"/>
+
+        <param name="min_particles"             value="500"/>
+        <param name="max_particles"             value="3000"/>
+        <param name="kld_err"                   value="0.02"/>
+        <param name="update_min_d"              value="0.20"/>
+        <param name="update_min_a"              value="0.20"/>
+        <param name="resample_interval"         value="1"/>
+        <param name="transform_tolerance"       value="0.5"/>
+        <param name="recovery_alpha_slow"       value="0.00"/>
+        <param name="recovery_alpha_fast"       value="0.00"/>
+        <param name="initial_pose_x"            value="$(arg initial_pose_x)"/>
+        <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
+        <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
+        <param name="gui_publish_rate"          value="50.0"/>
+
+        <remap from="scan"                      to="base_scan"/>
+        <param name="laser_max_range"           value="3.5"/>
+        <param name="laser_max_beams"           value="180"/>
+        <param name="laser_z_hit"               value="0.5"/>
+        <param name="laser_z_short"             value="0.05"/>
+        <param name="laser_z_max"               value="0.05"/>
+        <param name="laser_z_rand"              value="0.5"/>
+        <param name="laser_sigma_hit"           value="0.2"/>
+        <param name="laser_lambda_short"        value="0.1"/>
+        <param name="laser_likelihood_max_dist" value="2.0"/>
+        <param name="laser_model_type"          value="likelihood_field"/>
+
+        <param name="odom_model_type"           value="diff"/>
+        <param name="odom_alpha1"               value="0.1"/>
+        <param name="odom_alpha2"               value="0.1"/>
+        <param name="odom_alpha3"               value="0.1"/>
+        <param name="odom_alpha4"               value="0.1"/>
+        <param name="odom_frame_id"             value="$(arg tf_prefix)/odom"/> 
+        <param name="base_frame_id"             value="$(arg tf_prefix)/base_footprint"/> 
+
+        <remap from="map" to="/map" />
+    </node>
+
+</launch>
