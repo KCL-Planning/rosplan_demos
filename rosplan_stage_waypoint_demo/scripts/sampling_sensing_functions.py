@@ -63,7 +63,7 @@ def doughnut_visible_from(msg, params):
                 kus.knowledge.append(ki)
                 params[1].append(d['name'])
             res = update_kb(kus)
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr("KCL (%s) Failed to update knowledge base: %s" % rospy.get_name(), e.message)
         skip_check = True
 
@@ -86,7 +86,7 @@ def doughnut_visible_from(msg, params):
                 kus.knowledge.append(ki)
                 params[0].append(wp)
             res = update_kb(kus)
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr("KCL (%s) Failed to update knowledge base: %s" % rospy.get_name(), e.message)
         skip_check = True
 
@@ -134,7 +134,7 @@ def doughnut_visible_from(msg, params):
                 pose = []
                 try:
                     pose = rospy.get_param(waypoint_namespace+"/"+wp)
-                except KeyError, e:
+                except KeyError as e:
                     return ret_value
 
                 if len(pose) > 0:
