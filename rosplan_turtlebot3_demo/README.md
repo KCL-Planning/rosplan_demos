@@ -6,7 +6,7 @@ The turtlebot demo is a simple exploration mission. The robot will visit randoml
 
 See image below showing gazebo and rviz visualisation.
 
-<img src="doc/turtle_demo_gazebo.jpg" width="50%" height="50%"><img src="doc/turtle_demo.png" width="50%" height="50%">
+<img src="doc/turtle_demo_gazebo.jpg" width="50%" height="50%"><img src="doc/turtle_demo.png" width="45%" height="45%">
 
 ### Turtlebot PDDL domain
 
@@ -19,12 +19,19 @@ rosed rosplan_turtlebot3_demo domain_turtlebot_demo.pddl
 
 ## Installation instructions
 
+First make sure you have followed the installation instructions on [rosplan demos main repository](https://github.com/kcl-planning/rosplan_demos).
+
 The demo requires that you install turtlebot 3 gazebo simulator and some other ros debian pkgs, this will be done later on using rosdep, for now setup only build dependencies.
 ```
-cd ~/rosplan_ws/src
-git clone https://github.com/KCL-Planning/ROSPlan.git
-git clone https://github.com/KCL-Planning/rosplan_demos.git
-git clone https://github.com/clearpathrobotics/occupancy_grid_utils
+git clone --branch noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+git clone --branch noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
+```
+
+Install dependencies:
+```
+sudo apt install ros-$ROS_DISTRO-turtlebot3-msgs
+cd <your catkin workspace>/src
+rosdep install --from-paths ./ -i -y --rosdistro noetic
 ```
 
 Compile the code:
@@ -32,10 +39,9 @@ Compile the code:
 catkin build
 ```
 
-Source the ROSPlan workspace and install runtime dependencies:
+Source the ROSPlan workspace:
 ```
 source ~/rosplan_ws/devel/setup.bash
-rosdep install rosplan_turtlebot3_demo
 ```
 
 ## Run instructions

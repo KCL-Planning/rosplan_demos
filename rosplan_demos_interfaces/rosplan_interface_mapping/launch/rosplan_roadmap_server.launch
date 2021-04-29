@@ -19,7 +19,7 @@
     <arg name="costmap_topic" default="/move_base/global_costmap/costmap" />
 
     <!-- the reference frame in which the map coordinates are expressed -->
-    <arg name="wp_reference_frame" default="/map" />
+    <arg name="wp_reference_frame" default="map" />
 
     <!-- the mapping interface will wait for this max. amount of time looking for KB and map services -->
     <arg name="srv_timeout" default="3.0" />
