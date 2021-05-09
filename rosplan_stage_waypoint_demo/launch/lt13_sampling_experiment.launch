@@ -2,12 +2,12 @@
 <launch>
 
     <!-- Important Experiment Arguments -->
-    <arg name="approach"         default="0" />
+    <arg name="sampling_approach"         default="0" />
     <arg name="max_sample_size"  default="50" />
     <arg name="max_prm_size"     default="1000" />
     <arg name="rviz"             default="true" />
     <arg name="objects_file"     default="$(find hidden_costs_generator)/object_config/simple_house_30doughnuts_variant00.yaml" />
-    <arg name="hppit_file"       default="$(find hidden_costs_generator)/maps/objects-empty.yaml" />
+    <arg name="prefs_file"       default="$(find hidden_costs_generator)/maps/objects-empty.yaml" />
     <arg name="initial_state"    default="$(find hidden_costs_generator)/pddl_problems/problem_1goal_simple_house_30doughnuts_variant00.yaml.pddl" />
 
     <param name="/use_sim_time" value="$(arg rviz)"/>
@@ -34,8 +34,8 @@
     <!-- roadmap (random waypoint generation) -->
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
         <arg name="use_static_map"      value="true" />
-        <arg name="update_waypoints"    value="$(eval arg('approach')==1)" />
-        <arg name="update_connectivity" value="$(eval arg('approach')==1)" />
+        <arg name="update_waypoints"    value="$(eval arg('sampling_approach')==1)" />
+        <arg name="update_connectivity" value="$(eval arg('sampling_approach')==1)" />
         <arg name="wp_reference_frame"  value="/map" />
         <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
         <arg name="costmap_topic"       value="/costmap" />
@@ -58,11 +58,11 @@
         <rosparam file="$(arg objects_file)" command="load" />
         <param name="main_rate"  value="10" />
         <!-- override the waypoint namespace to use the PRM waypoints -->
-        <param name="waypoint_namespace"  value="/rosplan_demo_waypoints/wp" if="$(eval arg('approach')==1)"/>
+        <param name="waypoint_namespace"  value="/rosplan_demo_waypoints/wp" if="$(eval arg('sampling_approach')==1)"/>
     </node>
 
     <!-- sampling approach -->
-    <group if="$(eval arg('approach')==0)">
+    <group if="$(eval arg('sampling_approach')==0)">
         <!-- waypoint filtering node (roadmap) -->
         <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_roadmap_filter" output="screen">
             <param name="srv_timeout"         value="6" />
@@ -73,7 +73,7 @@
             <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
             <!--<param name="costmap_topic"       value="/costmap" />-->
             <param name="costmap_topic"       value="/merged_map" />
-            <param name="hppits_topic"        value="/hppits_map" />
+            <param name="prefs_topic"        value="/prefs_map" />
 
             <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
             <param name="minimum_sample_separation" value="1.6" />
@@ -85,7 +85,7 @@
 
 
     <!-- fixed waypoint approach -->
-    <group if="$(eval arg('approach')==2)">
+    <group if="$(eval arg('sampling_approach')==2)">
     
         <!-- fixed waypoint generation node (1 per object) (roadmap) -->
         <node pkg="rosplan_waypoint_sampling" name="waypoint_sampler" type="rp_fixed_wp_gen" output="screen">
@@ -96,7 +96,7 @@
             <param name="wp_namespace_output" value="/task_planning_waypoints" />
             <param name="rosplan_kb_name"     value="rosplan_knowledge_base" />
             <param name="costmap_topic"       value="/costmap" />
-            <param name="hppits_topic"        value="/hppits_map" />
+            <param name="prefs_topic"        value="/prefs_map" />
 
             <!-- The radius around a sampled point for which the sampling probability is reduced to 0 -->
             <param name="minimum_sample_separation" value="1.6" />
@@ -110,7 +110,7 @@
     <!-- hidden costmaps -->
     <node pkg="rosplan_waypoint_sampling" name="hidden_costmap" type="HiddenCostPublisher.py" output="screen">
         <rosparam file="$(arg objects_file)" command="load" />
-        <rosparam file="$(arg hppit_file)" command="load" />
+        <rosparam file="$(arg prefs_file)" command="load" />
     </node>
 
     <group if="$(arg rviz)">
@@ -133,7 +133,7 @@
         <param name="results_path"           value="$(find rosplan_stage_waypoint_demo)/pddl/results.csv" />
         <param name="initial_state"          value="$(arg initial_state)" />
         <param name="planner_command"        value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
-        <param name="approach"               value="$(arg approach)" />
+        <param name="sampling_approach"               value="$(arg sampling_approach)" />
     </node>
 
 

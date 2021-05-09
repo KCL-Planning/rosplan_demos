@@ -67,6 +67,7 @@ namespace KCL_rosplan {
      * Constructor
      */
     RPRoadmapServer::RPRoadmapServer() : nh_("~"), costmap_received_(false), srv_timeout_(3.0), occupancy_threshold_(10) {
+       
 
         std::string rosplan_kb_name;
         std::string odom_topic;
@@ -478,24 +479,25 @@ namespace KCL_rosplan {
 
             // Sample a random waypoint, if possible with fewer than 6 neighbours.
             std::map<std::string, Waypoint*>::iterator item = waypoints_.begin();
-            std::advance(item, rand() % waypoints_.size());
+	    // choosing an existing waypoint to expand (this method may be overloaded by subclasses)	
+	    // added by Sarah Keren
+	    int WPindex = chooseWPtoExpand();	
+            std::advance(item, WPindex);
             Waypoint* casting_wp = (*item).second;
 
             // sample collision-free configuration at random
-            int x = rand() % width;
-            int y = rand() % height;
-
-            std::stringstream ss;
-            ss << "wp" << waypoints_.size();
-            Waypoint* wp = new Waypoint(ss.str(), x, y, map.info);
-
-            // Move the waypoint closer so it's no further than @ref{casting_distance} away from the casting_wp.
-            wp->update(*casting_wp, casting_distance, map.info);
-
-            if(map.data[y*width+x] > occupancy_threshold) {
-                delete wp;
+	    // added by Sarah Keren
+	    Waypoint* wp = castNewWP(casting_wp, casting_distance, occupancy_threshold, map);
+	    if(wp == NULL) {                
                 continue;
             }
+
+
+	  
+	    // process any application-relevant information about the wp
+	    // added by Sarah Keren
+  	    this->processWP(wp);	
+		
 
             // Check whether this waypoint is connected to any of the existing waypoints.
             geometry_msgs::Point p1, p2;
@@ -519,7 +521,6 @@ namespace KCL_rosplan {
                 Waypoint* other_wp = (*ci).second;
                 p2.x = other_wp->real_x;
                 p2.y = other_wp->real_y;
-
                 if (wp->getDistance(*other_wp) < connecting_distance && canConnect(p1, p2, map, occupancy_threshold)) {
                     wp->neighbours.push_back(other_wp->wpID);
                     other_wp->neighbours.push_back(wp->wpID);
@@ -533,6 +534,33 @@ namespace KCL_rosplan {
             }
         }
     }
+
+    Waypoint* RPRoadmapServer::castNewWP(Waypoint* casting_wp, double casting_distance, double occupancy_threshold, const nav_msgs::OccupancyGrid &map) {	
+	
+           int width = map.info.width;
+           int height = map.info.height;
+           double resolution = map.info.resolution; // m per cell
+
+    
+	    int x = rand() % width;
+            int y = rand() % height;
+
+            std::stringstream ss;
+            ss << "wp" << waypoints_.size();
+            Waypoint* wp = new Waypoint(ss.str(), x, y, map.info);
+
+	   // Move the waypoint closer so it's no further than @ref{casting_distance} away from the casting_wp.
+            wp->update(*casting_wp, casting_distance, map.info);
+
+            if(map.data[wp->grid_x + wp->grid_y * map.info.width] > occupancy_threshold) {
+                delete wp;
+		return NULL;
+            }
+
+
+	    return wp;
+
+    }	
 
     bool RPRoadmapServer::addWaypointSrv(rosplan_interface_mapping::AddWaypoint::Request &req, rosplan_interface_mapping::AddWaypoint::Response &res) {
         // add wp and store in param server
@@ -888,6 +916,21 @@ namespace KCL_rosplan {
         marker.action = visualization_msgs::Marker::DELETE;
         edges_pub_.publish( marker );
     }
+
+    int RPRoadmapServer::chooseWPtoExpand()
+    {
+
+	return rand() % waypoints_.size();
+       
+
+    }//chooseWPtoExpand
+
+    void RPRoadmapServer::processWP(Waypoint* wp)
+    {        
+	return;
+    }
+
+
 } // close namespace
 
 int main(int argc, char **argv) {

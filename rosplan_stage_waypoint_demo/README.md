@@ -56,7 +56,7 @@ The launch file has the following arguments:
   - *max_sample_size*: the maximum number of waypoints that will be sampled using the task-aware waypoint sampling approach before returning failure. The default is 50.
   - *max_prm_size*: the size of the PRM from which to sample waypoints, or the maximum size of the PRM in approach 1. The default is 1000 nodes.
   - *objects_file*: path to the object configuration file that specifies the initial positions of each machine in the world. A number of these configuration files are available in the ROB-IS repository.
-  - *hppit_file*: optional path to the hidden cost configuration file that specifies some additional preferences over where the robot is allowed to perform inspections. A number of these configuration files are available in the ROB-IS repository.
+  - *prefs_file*: optional path to the hidden cost configuration file that specifies some additional preferences over where the robot is allowed to perform inspections. A number of these configuration files are available in the ROB-IS repository.
   - *initial_state*: the initial state file that specifies the goal for the problem, and corresponds to the objects file. These are also available in the ROB-IS repository.
 
 ### Sampling Approaches

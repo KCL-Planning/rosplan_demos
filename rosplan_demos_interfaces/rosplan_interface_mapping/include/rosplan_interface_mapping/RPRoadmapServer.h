@@ -130,7 +130,7 @@ namespace KCL_rosplan {
          * will generate the waypoints
          * @param res the response that we need to fill and provide to the user as feedback
          */
-        bool generateRoadmap(rosplan_interface_mapping::CreatePRM::Request &req, rosplan_interface_mapping::CreatePRM::Response &res);
+        virtual bool generateRoadmap(rosplan_interface_mapping::CreatePRM::Request &req, rosplan_interface_mapping::CreatePRM::Response &res);
 
         /**
          * @brief Callback function provided by this server node, when user makes a request to add a waypoint
@@ -174,7 +174,7 @@ namespace KCL_rosplan {
          * @param connecting_distance the maximum distance that can exists between waypoints for them to be considered connected
          * @param total_attempts maximum amount of attempts to generate random valid waypoints
          */
-        void createPRM(nav_msgs::OccupancyGrid &map, unsigned int nr_waypoints, double min_distance, double casting_distance, double connecting_distance, double occupancy_threshold, int total_attempts);
+        virtual void createPRM(nav_msgs::OccupancyGrid &map, unsigned int nr_waypoints, double min_distance, double casting_distance, double connecting_distance, double occupancy_threshold, int total_attempts);
 	
         /**
          * @brief uploading an edge to the param server (Sarah)
@@ -186,7 +186,7 @@ namespace KCL_rosplan {
 	bool uploadEdgeToParamServer(std::string wpSource, std::string wpSink, double dist);
    
 
-      private:
+      protected:
 
         /**
          * @brief remove waypoint from parameter server and from ROSPlan Knowledge base
@@ -203,6 +203,24 @@ namespace KCL_rosplan {
         * @return True if the waypoints can be connected, false otherwise.
         */
         bool canConnect(const geometry_msgs::Point& w1, const geometry_msgs::Point& w2, nav_msgs::OccupancyGrid &map, double occupancy_threshold);
+	
+        /** 
+        * @Choosing the next WP from the PRM to expand   
+        * @return index of the chosen WP
+        */
+        virtual int chooseWPtoExpand();
+
+        /** 
+        * @analyze the chosen WP
+        * @return void
+        */
+        virtual void processWP(Waypoint* wp);
+
+        /** 
+        * @choose wp to cast new edge to
+        * @return newly created waypoint
+        */
+        virtual Waypoint* castNewWP(Waypoint* casting_wp, double casting_distance, double occupancy_threshold, const nav_msgs::OccupancyGrid &map);
 
         /// visualisation functions
         void pubWPGraph();
