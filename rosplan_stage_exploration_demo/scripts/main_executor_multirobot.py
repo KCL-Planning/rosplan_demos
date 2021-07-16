@@ -96,7 +96,7 @@ try:
     # wait for odom to publish to sensing interface
     sps = rospy.ServiceProxy('/rosplan_knowledge_base/state/propositions', GetAttributeService)    
     count = 0
-    while count<1:
+    while count<2:
         rospy.sleep(1)
         gas = GetAttributeServiceRequest()    
         gas.predicate_name = 'robot_at'
@@ -109,7 +109,7 @@ try:
                 count = count + 1
 
     # add goals to the KB
-    for i in range(3):
+    for i in range(6):
         wp_goal = random.randint(0,max_prm_size-1)
         kus = KnowledgeUpdateServiceRequest()
         kus.update_type = 1

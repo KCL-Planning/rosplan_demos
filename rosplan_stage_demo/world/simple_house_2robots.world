@@ -42,11 +42,12 @@ define erratic position
   topurg(pose [ 0.050 0.000 0.000 0.000 ])
 )
 
-# throw in a robot
-erratic( pose [ 0.0 0.0 0.000 -0.993 ] name "era" color "red")
+# throw in two robots
+erratic( pose [ 0.000 -1.000 0.000 1.000 ] name "kenny" color "red")
+erratic( pose [ 0.000 3.000 0.000 3.000 ] name "betsy" color "blue")
 
 window
 (
-   size [3840 2031]
+   size [1920 2031]
    show_data 1
 )

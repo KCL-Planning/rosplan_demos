@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<launch>
+
+    <param name="/use_sim_time" value="true"/>
+
+    <!-- Arguments -->
+    <arg name="model"             default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="map_file"          default="$(find rosplan_stage_demo)/maps/simple_house.yaml"/>
+    <arg name="world_file"        default="$(find rosplan_stage_demo)/world/simple_house_2robots.world"/>
+    <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
+    <arg name="local_param_file"  default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
+    <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
+
+    <!-- stage simulation -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(arg world_file)" respawn="false" output="log"/>
+
+    <!-- Map server -->
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <!-- visualisation of robot sensor data -->
+    <arg name="use_default_rviz" default="false" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_demo)/config/rosplan_stage_demo_multirobot.rviz" if="$(arg use_default_rviz)"/>
+
+    <!-- robot names -->
+    <arg name="robot_name_0" default="robot_0" />
+    <arg name="robot_name_1" default="robot_1" />
+
+    <!-- ROBOT 0 -->
+    <group ns="$(arg robot_name_0)">
+        <param name="tf_prefix" value="$(arg robot_name_0)" />
+
+        <include file="$(find rosplan_stage_demo)/launch/multirobot.launch">
+            <arg name="tf_prefix" value="$(arg robot_name_0)" />
+            <arg name="namespace" value="$(arg robot_name_0)"/>
+            <arg name="initial_pose_x" value="6.525"/>
+            <arg name="initial_pose_y" value="4.375"/>
+            <arg name="initial_pose_a" value="0.000"/>
+            <arg name="model" value="$(arg model)"/>
+        </include>
+    </group>
+
+    <!-- ROBOT 1 -->
+    <group ns="$(arg robot_name_1)">
+        <param name="tf_prefix" value="$(arg robot_name_1)" />
+
+        <include file="$(find rosplan_stage_demo)/launch/multirobot.launch">
+            <arg name="tf_prefix" value="$(arg robot_name_1)" />
+            <arg name="namespace" value="$(arg robot_name_1)"/>
+            <arg name="initial_pose_x" value="6.525"/>
+            <arg name="initial_pose_y" value="8.375"/>
+            <arg name="initial_pose_a" value="0.000"/>
+            <arg name="model" value="$(arg model)"/>
+        </include>
+    </group>
+
+
+</launch>

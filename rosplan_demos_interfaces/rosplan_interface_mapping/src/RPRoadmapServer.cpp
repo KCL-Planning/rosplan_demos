@@ -442,11 +442,11 @@ namespace KCL_rosplan {
         waypoints_.clear();
         edges_.clear();
 
-        ros::Rate r(10);
+        ros::Rate r(1);
         while (not odom_received_) {
+            ROS_INFO("KCL: (%s) Odom not recieved", ros::this_node::getName().c_str());
             ros::spinOnce();
             r.sleep();
-            std::cout << "GERERAD" << std::endl;
         }
 
         // create robot start point

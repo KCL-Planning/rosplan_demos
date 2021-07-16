@@ -4,6 +4,7 @@ This package contains the base maps and launches upon which the other stage demo
 
 The package contains:
 - An example launch file for a robot simulation in [Stage](http://wiki.ros.org/stage).
+- An example launch file for two robots in simulation in Stage.
 - Stage world files, maps, and configuration files.
 
 #### Demo Description
@@ -49,5 +50,14 @@ source devel/setup.bash
 - **Launch the demo**  
 Begin the simulation and rviz visualisation:
 ```
-roslaunch rosplan_stage_demo empty_stage.launch
+roslaunch rosplan_stage_demo empty_stage_single_robot.launch
+```
+or for two robots:
+```
+roslaunch rosplan_stage_demo empty_stage_multi_robot.launch
+```
+
+Optionally, set an argument to also open RVIZ:
+```
+roslaunch rosplan_stage_demo empty_stage_multi_robot.launch use_default_rviz:=true
 ```

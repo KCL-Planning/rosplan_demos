@@ -1,24 +1,26 @@
 <?xml version="1.0"?>
 <launch>
 
+    <param name="/use_sim_time" value="true"/>
+
     <!-- PDDL Arguments -->
-    <arg name="domain_path"  default="$(find rosplan_stage_exploration_demo)/pddl/domain_turtlebot_demo.pddl" />
-    <arg name="initial_state" default="$(find rosplan_stage_exploration_demo)/pddl/problem_turtlebot_demo.pddl" />
+    <arg name="domain_path"  default="$(find rosplan_stage_exploration_demo)/pddl/domain_turtlebot_demo_multirobot.pddl" />
+    <arg name="initial_state" default="$(find rosplan_stage_exploration_demo)/pddl/problem_turtlebot_demo_multirobot.pddl" />
     <arg name="data_path"    default="$(find rosplan_stage_exploration_demo)/pddl/" />
     <arg name="autom_gen_problem_path" default="$(find rosplan_stage_exploration_demo)/pddl/generated_problem.pddl" />
 
     <!-- Arguments -->
-    <arg name="model"             default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="map_file"          default="$(find rosplan_stage_demo)/maps/simple_house.yaml"/>
-    <arg name="world_file"        default="$(find rosplan_stage_demo)/world/simple_house.world"/>
+    <arg name="world_file"        default="$(find rosplan_stage_demo)/world/simple_house_2robots.world"/>
     <arg name="common_param_file" default="$(find rosplan_stage_demo)/config/costmap_common_params_waffle.yaml"/>
     <arg name="local_param_file"  default="$(find rosplan_stage_demo)/config/local_costmap_params.yaml"/>
     <arg name="global_param_file" default="$(find rosplan_stage_demo)/config/global_costmap_params.yaml"/>
     <arg name="max_prm_size"      default="80" />
 
+    <arg name="waypoints" default='0' />
+
     <!-- base stage demo -->
-    <include file="$(find rosplan_stage_demo)/launch/empty_stage_no_rviz.launch" >
-        <arg name="model"             value="$(arg model)" />
+    <include file="$(find rosplan_stage_demo)/launch/empty_stage_multi_robot.launch" >
         <arg name="map_file"          value="$(arg map_file)"/>
         <arg name="world_file"        value="$(arg world_file)"/>
         <arg name="common_param_file" value="$(arg common_param_file)"/>
@@ -27,16 +29,17 @@
     </include>
 
     <!-- visualisation of robot sensor data -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_exploration_demo)/config/exploration.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_exploration_demo)/config/exploration_multirobot.rviz" />
 
     <!-- probabilistic roadmap generation -->
     <include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" >
         <arg name="use_static_map"      value="false" />
         <arg name="update_waypoints"    value="true" />
-        <arg name="update_connectivity" value="true" />
+        <arg name="update_connectivity" value="false" />
         <arg name="wp_reference_frame"  value="/map" />
         <arg name="rosplan_kb_name"     value="rosplan_knowledge_base" />
-        <arg name="costmap_topic"       value="/move_base/global_costmap/costmap" />
+        <arg name="costmap_topic"       value="/robot_0/move_base/global_costmap/costmap" />
+        <arg name="odom_topic"          value="/robot_0/odom" />
     </include>
 
     <!-- ROSPlan -->
@@ -52,22 +55,20 @@
 
     <!-- rosplan sensing interface -->
     <node name="rosplan_sensing_interface" pkg="rosplan_sensing_interface" type="sensing_interface.py" respawn="false" output="screen">
-        <rosparam command="load" file="$(find rosplan_stage_exploration_demo)/config/sensing_config.yaml" />
+        <rosparam command="load" file="$(find rosplan_stage_exploration_demo)/config/sensing_config_multirobot.yaml" />
         <param name="main_rate"  value="10" />
     </node>
 
-    <!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware -->
-    <node pkg="rosplan_interface_movebase" type="rpmovebase" name="rosplan_interface_movebase" respawn="false" output="screen">
+    <!-- ActionInterfaceManager -->
+    <node name="rosplan_action_interface" pkg="rosplan_action_interface" type="ActionInterfaceManager.py" respawn="false" output="screen">
+        <rosparam command="load" file="$(find rosplan_stage_exploration_demo)/config/action_config_multirobot.yaml" />
         <param name="knowledge_base"        value="rosplan_knowledge_base" />
-        <param name="action_server"         value="/move_base" />
-        <param name="pddl_action_name"      value="goto_waypoint" />
-        <param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
         <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
-        <param name="wp_namespace"          value="/rosplan_demo_waypoints/wp" />
+        <param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
     </node>
 
     <!-- main coordinator -->
-    <node pkg="rosplan_stage_exploration_demo" type="main_executor.py" name="coordinator" respawn="false" required="true" output="screen">
+    <node pkg="rosplan_stage_exploration_demo" type="main_executor_multirobot.py" name="coordinator" respawn="false" required="false" output="screen">
         <param name="max_prm_size"    value="$(arg max_prm_size)" />
         <param name="planner_command" value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
         <param name="domain_path"     value="$(arg domain_path)" />
@@ -75,12 +76,9 @@
         <param name="data_path"       value="$(arg data_path)" />
     </node>
 
-    <!-- graph saver -->
-    <node pkg="rosplan_stage_exploration_demo" type="graph_saver.py" name="graph_saver" respawn="false" output="screen">
+    <!-- plan graph visualisation -->
+    <node pkg="rosplan_rqt" type="esterel_plan_viewer.py" name="esterel_plan_viewer" respawn="false" output="log" />
+    <node pkg="rosplan_stage_exploration_demo" type="graph_saver.py" name="graph_saver" respawn="false" output="log">
         <param name="data_path" value="$(find rosplan_stage_exploration_demo)/pddl/exploration_plan.dot" />
-    </node>
-
-    <!-- graph saver -->
-    <node pkg="rosplan_rqt" type="esterel_plan_viewer.py" name="esterel_plan_viewer" respawn="false" output="screen">
     </node>
 </launch>

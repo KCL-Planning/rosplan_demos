@@ -1,0 +1,14 @@
+functions:
+    - $(find rosplan_stage_exploration_demo)/scripts/exploration_sensing_functions.py
+topics:
+    robot_at:
+        - params:
+              - 'robot_0'
+              - '*'
+          topic: /robot_0/amcl_pose
+          msg_type: geometry_msgs/PoseWithCovarianceStamped
+        - params:
+              - 'robot_1'
+              - '*'
+          topic: /robot_1/amcl_pose
+          msg_type: geometry_msgs/PoseWithCovarianceStamped

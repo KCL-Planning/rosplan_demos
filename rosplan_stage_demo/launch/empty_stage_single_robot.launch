@@ -17,12 +17,17 @@
     <!-- Map server -->
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
-    <!-- AMCL -->
-    <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
-        <arg name="scan_topic" value="base_scan" />
+    <!-- visualisation of robot sensor data -->
+    <arg name="use_default_rviz" default="false" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_stage_demo)/config/rosplan_stage_demo.rviz" if="$(arg use_default_rviz)"/>
+
+
+    <!-- ROBOT 0 -->
+    <include file="$(find rosplan_stage_demo)/launch/robot.launch">
         <arg name="initial_pose_x" value="6.525"/>
-        <arg name="initial_pose_y" value="5.375"/>
+        <arg name="initial_pose_y" value="4.375"/>
         <arg name="initial_pose_a" value="0.000"/>
+        <arg name="model" value="$(arg model)"/>
     </include>
 
 </launch>
