@@ -18,13 +18,15 @@
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="log">
         <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
         <rosparam file="$(arg common_param_file)" command="load" ns="global_costmap" />
+        <rosparam file="$(arg common_param_file)" command="load" ns="local_costmap" />
         <rosparam file="$(arg local_param_file)" command="load" />
         <rosparam file="$(arg global_param_file)" command="load" />
         <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load" />
         <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
         <remap from="cmd_vel" to="/cmd_vel"/>
         <remap from="odom" to="odom"/>
-        <param name="DWAPlannerROS/min_vel_x" value="0.0" if="false" />
+        <param name="DWAPlannerROS/min_vel_x" value="0.0" />
+        <param name="DWAPlannerROS/sim_time" value="2.5" />
     </node>
 
     <!-- AMCL -->
