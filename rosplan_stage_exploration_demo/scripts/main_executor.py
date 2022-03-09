@@ -129,5 +129,5 @@ try:
     if plan_found:
         execute_plan()
 
-except rospy.ServiceException, e:
+except rospy.ServiceException as e:
     rospy.logerr("KCL: (%s) Service call failed: %s" % (rospy.get_name(), e))

@@ -137,7 +137,7 @@ def plan_cost():
 
     # get the cost parameters for waypoints
     wp_costs = rospy.get_param('/task_planning_waypoints_pref')
-    print wp_costs
+    rospy.loginfo(wp_costs)
 
     # get distance travelled
     total_distance = 0
@@ -145,35 +145,36 @@ def plan_cost():
     current_wp_cost = 0
     old_time = 0
     for a in action_list:
-        if "goto_waypoint" in a:
+        if 'goto_waypoint' in a:
 
             ta = a.split("[")[1].split("]")[0]
             total_distance += float(ta)
 
-            print "======================"
-            print a
+            rospy.loginfo('======================')
+            rospy.loginfo(a)
             new_time = a.split(" ")[0][0:len(a.split(" ")[0])-1]
-            print "new time stamp: "+new_time
+            rospy.loginfo(f'new time stamp: {new_time}')
             time_at_wp = float(new_time) - old_time
             old_time = float(new_time)
             incurred_cost = time_at_wp * current_wp_cost
             total_cost = total_cost + incurred_cost
-            print "increasing cost by: " + str(time_at_wp) + " * " + str(current_wp_cost) + " = " +  str(incurred_cost)
+            rospy.loginfo(f'increasing cost by: {str(time_at_wp)} * {str(current_wp_cost)} = {str(incurred_cost)}')
 
-            print "----------------------"
+            rospy.loginfo('----------------------')
             # 0:dispatch_time 1:action_name 2:vehicle 3:from 4:to) 5:duration
             ta = a.split(" ")[4][0:len(a.split(" ")[4])-1]
-            print "new wp: " + ta
+            rospy.loginfo(f'new wp: {ta}')
             current_wp_cost = 100 - wp_costs[ta]
-            print "new wp cost: " + str(current_wp_cost)
+            rospy.loginfo(f'new wp cost: {str(current_wp_cost)}')
 
 
-    print "======================"
-    print "final time: " + str(plan_duration)
+    rospy.loginfo('======================')
+    rospy.loginfo(f'final time: {str(plan_duration)}')
     time_at_wp = plan_duration - old_time
     incurred_cost = time_at_wp * current_wp_cost
     total_cost = total_cost + incurred_cost
-    print "increasing cost by: " + str(time_at_wp) + " * " + str(current_wp_cost) + " = " +  str(incurred_cost) 
+    rospy.loginfo("increasing cost by: " + str(time_at_wp) + " * " + str(current_wp_cost) + " = " +  str(incurred_cost)
+    rospy.loginfo(f'increasing cost by: {str(time_at_wp)} * {str(current_wp_cost)} = {str(incurred_cost)}')
 
     try:
         f = open(results_path, "a")
@@ -265,5 +266,5 @@ try:
         if not plan_found:
             plan_failed()
 
-except rospy.ServiceException, e:
+except rospy.ServiceException as e:
     rospy.logerr("KCL: (%s) Service call failed: %s" % (rospy.get_name(), e))
